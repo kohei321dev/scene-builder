@@ -1,4 +1,4 @@
-# Scene Speak
+# Scene Builder
 
 英検3級レベルから、日常会話で使える英語を増やすための個人学習プロジェクトです。
 
@@ -6,8 +6,8 @@
 
 ## Current Direction
 
-- project name: `Scene Speak`
-- repository name: `scene-speak`
+- project name: `Scene Builder`
+- repository name: `scene-builder`
 - 学習者: 英検3級程度
 - 目標: 日常会話、特にスケボー場面で自分の経験や質問を言えること
 - 課題: 話したい内容があっても、英文として頭に出てこない
@@ -32,6 +32,10 @@
 - `data/topic-cards.csv`: スケボー会話向けトピックカード
 - `data/diary-prompts.csv`: 短い英語日記の練習プロンプト
 - `data/vocabulary.csv`: 使い回したい語彙・表現
+
+## License
+
+MIT License. See `LICENSE`.
 
 ## Feasibility Summary
 

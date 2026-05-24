@@ -5,7 +5,7 @@
 
 ## Context
 
-Scene Speakでは、ユーザーが入力した英語回答に対して、点数、修正文、自然な言い換え、覚える表現を返したい。
+Scene Builderでは、ユーザーが入力した英語回答に対して、点数、修正文、自然な言い換え、覚える表現を返したい。
 
 静的サイトだけでは自由入力の意味理解や自然な添削はできない。AI API連携が必要になる。一方で、API keyをclientへ置くと漏洩と課金事故のリスクが高い。
 
@@ -87,4 +87,3 @@ Browser
 - xAI account FAQ says Grok and xAI API billing are separate: https://docs.x.ai/developers/faq/accounts
 - GroqCloud uses `GROQ_API_KEY` and supports AI SDK integration: https://console.groq.com/docs/quickstart
 - GroqCloud spend limits can cap organization-wide API usage: https://console.groq.com/docs/spend-limits
-

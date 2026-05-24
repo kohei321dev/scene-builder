@@ -1,12 +1,12 @@
-# Product Brief: Scene Speak
+# Product Brief: Scene Builder
 
 ## Name
 
-採用名は `Scene Speak`。repo名は `scene-speak`。
+採用名は `Scene Builder`。repo名は `scene-builder`。
 
 理由:
 
-- シチュエーション別に話す練習をする、というプロダクトの中心を表している
+- シチュエーション別に英文を組み立てる、というプロダクトの中心を表している
 - スケボー専用ではないため、日常会話、旅行、仕事、友達との雑談にも拡張できる
 - 個人学習用でも、URLを知っている人が使える小さな学習サイトとしても違和感が少ない
 - GitHub repository名として短く扱いやすい

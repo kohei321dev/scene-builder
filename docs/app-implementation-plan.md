@@ -14,7 +14,7 @@
 
 Next.jsを選ぶ理由は、最初は静的表示だけで始められ、後でAI review用のRoute Handlerを追加しやすいため。
 
-project nameは `Scene Speak`、repository nameは `scene-speak` とする。
+project nameは `Scene Builder`、repository nameは `scene-builder` とする。
 
 ## MVP Screen
 
@@ -94,4 +94,3 @@ AI reviewを入れる場合は、以下の5項目を各0-2点にする。
 [未検証] 実際にどのカード形式が継続しやすいかは、数日使ってから調整する必要がある。
 
 [未検証] Grok/xAI APIとGroqCloud APIのどちらを使うかは、手元のAPI keyのprovider確認後に確定する。
-
