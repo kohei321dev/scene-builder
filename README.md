@@ -56,7 +56,7 @@ Vercel Environment Variablesに次を設定します。
 - `AUTH_GITHUB_SECRET`
 - `AUTH_SECRET`
 - `NEXTAUTH_URL=https://your-vercel-url`
-- `OWNER_GITHUB_USERNAME=uechikohei`
+- `OWNER_GITHUB_USERNAME=kohei321dev`
 
 `OWNER_GITHUB_USERNAME` と一致するGitHub loginだけがトップページを閲覧できます。
 

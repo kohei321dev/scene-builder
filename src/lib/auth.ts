@@ -2,7 +2,7 @@ import type { NextAuthOptions, Session } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 
 export const ownerGithubUsername =
-  process.env.OWNER_GITHUB_USERNAME?.trim() || "uechikohei";
+  process.env.OWNER_GITHUB_USERNAME?.trim() || "kohei321dev";
 
 const githubClientId =
   process.env.AUTH_GITHUB_ID || process.env.GITHUB_ID || "missing-client-id";

@@ -32,7 +32,7 @@ async function SignInContent({ searchParams }: Props) {
               <li>AUTH_GITHUB_ID</li>
               <li>AUTH_GITHUB_SECRET</li>
               <li>AUTH_SECRET</li>
-              <li>OWNER_GITHUB_USERNAME=uechikohei</li>
+              <li>OWNER_GITHUB_USERNAME=kohei321dev</li>
             </ul>
           </>
         ) : (
@@ -50,4 +50,3 @@ export default function SignInPage(props: Props) {
     </Suspense>
   );
 }
-
