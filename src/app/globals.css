@@ -276,12 +276,24 @@ button:focus-visible {
 }
 
 .model-answer,
-.done-note {
+.done-note,
+.error-note {
   background: var(--panel-strong);
   border: 1px solid #cbd9ce;
   border-radius: 8px;
   margin-top: 18px;
   padding: 16px;
+}
+
+.error-note {
+  background: #fff4ee;
+  border-color: #edc7b4;
+  color: var(--warning);
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.72;
 }
 
 .model-en {
@@ -334,4 +346,3 @@ button:focus-visible {
     width: 100%;
   }
 }
-
