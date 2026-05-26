@@ -1,0 +1,109 @@
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
+
+import {
+  generateSceneCardWithAi,
+  MissingCardGenerationApiKeyError,
+} from "@/lib/ai-card-generation";
+import { authOptions, isDevAuthBypassEnabled, isOwnerSession } from "@/lib/auth";
+
+export const runtime = "nodejs";
+
+type GenerateCardRequestBody = {
+  category?: unknown;
+  sceneJa?: unknown;
+  tags?: unknown;
+};
+
+export async function POST(request: Request) {
+  const contentLength = Number(request.headers.get("content-length") || 0);
+
+  if (contentLength > 4_000) {
+    return NextResponse.json(
+      { error: "入力が長すぎます。短いシチュエーションにしてください。" },
+      { status: 413 },
+    );
+  }
+
+  if (!isDevAuthBypassEnabled()) {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "カード追加にはログインが必要です。" },
+        { status: 401 },
+      );
+    }
+
+    if (!isOwnerSession(session)) {
+      return NextResponse.json(
+        { error: "カード追加はownerだけが実行できます。" },
+        { status: 403 },
+      );
+    }
+  }
+
+  const body = (await request.json().catch(() => null)) as
+    | GenerateCardRequestBody
+    | null;
+
+  if (!body) {
+    return NextResponse.json(
+      { error: "リクエストの形式が正しくありません。" },
+      { status: 400 },
+    );
+  }
+
+  const category = getString(body.category) || "custom";
+  const sceneJa = getString(body.sceneJa);
+  const tags = getTags(body.tags);
+
+  if (!sceneJa) {
+    return NextResponse.json(
+      { error: "シチュエーションを入力してください。" },
+      { status: 400 },
+    );
+  }
+
+  if (sceneJa.length > 300) {
+    return NextResponse.json(
+      { error: "シチュエーションが長すぎます。300文字以内にしてください。" },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const card = await generateSceneCardWithAi({ category, sceneJa, tags });
+    return NextResponse.json({ card });
+  } catch (error) {
+    if (error instanceof MissingCardGenerationApiKeyError) {
+      return NextResponse.json(
+        { error: "GROK_API_KEYが設定されていません。" },
+        { status: 503 },
+      );
+    }
+
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "カード生成に失敗しました。少し時間を置いて再実行してください。" },
+      { status: 502 },
+    );
+  }
+}
+
+function getString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function getTags(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map(getString).filter(Boolean).slice(0, 8);
+  }
+
+  if (typeof value === "string") {
+    return value.split(";").map((tag) => tag.trim()).filter(Boolean).slice(0, 8);
+  }
+
+  return [];
+}

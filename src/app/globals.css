@@ -26,6 +26,7 @@ body {
 }
 
 button,
+input,
 textarea {
   font: inherit;
 }
@@ -65,6 +66,11 @@ button {
   align-items: center;
   display: flex;
   gap: 12px;
+}
+
+.auth-button-stack {
+  display: grid;
+  gap: 10px;
 }
 
 .user-chip {
@@ -108,8 +114,76 @@ button {
   width: 100%;
 }
 
+.scene-list-entry {
+  align-items: stretch;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 8px;
+}
+
+.scene-list-entry .scene-list-item {
+  margin-bottom: 0;
+}
+
 .scene-list-item small {
   color: var(--muted);
+}
+
+.scene-list-meta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.scene-list-status {
+  color: var(--accent-strong);
+  display: inline-flex;
+  flex-wrap: wrap;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 6px;
+}
+
+.card-builder {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 12px;
+}
+
+.card-builder-heading {
+  align-items: center;
+  color: var(--accent-strong);
+  display: flex;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 8px;
+}
+
+.card-builder label {
+  display: grid;
+  gap: 6px;
+}
+
+.card-builder label span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card-builder input,
+.card-builder textarea {
+  min-height: 38px;
+}
+
+.card-builder textarea {
+  min-height: 104px;
 }
 
 .scene-list-item.active,
@@ -176,6 +250,33 @@ h2 {
   line-height: 1.6;
 }
 
+.practice-meta {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 13px;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.status-pill {
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 9px;
+}
+
+.status-pill.done {
+  background: #e6f2ec;
+  color: var(--accent-strong);
+}
+
+.status-pill.review {
+  background: #fff4d8;
+  color: var(--warning);
+}
+
 .tag-row {
   display: flex;
   flex-wrap: wrap;
@@ -229,7 +330,18 @@ textarea {
   width: 100%;
 }
 
+input {
+  background: #fffefa;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--foreground);
+  min-height: 40px;
+  padding: 0 12px;
+  width: 100%;
+}
+
 textarea:focus,
+input:focus,
 button:focus-visible {
   outline: 3px solid rgba(31, 111, 91, 0.25);
   outline-offset: 2px;
@@ -244,14 +356,31 @@ button:focus-visible {
 }
 
 .action-row > div {
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
 }
 
+.review-toggle {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--foreground);
+  display: inline-flex;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.review-toggle input {
+  accent-color: var(--accent);
+}
+
 .primary-button,
 .secondary-button,
+.icon-button,
 .icon-text-button {
   align-items: center;
   border-radius: 8px;
@@ -260,6 +389,20 @@ button:focus-visible {
   justify-content: center;
   min-height: 40px;
   padding: 0 14px;
+}
+
+.icon-button {
+  align-self: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  min-width: 40px;
+  padding: 0;
+}
+
+.icon-button.danger:hover {
+  border-color: #edc7b4;
+  color: var(--warning);
 }
 
 .primary-button {
@@ -276,6 +419,7 @@ button:focus-visible {
 }
 
 .model-answer,
+.ai-review,
 .done-note,
 .error-note {
   background: var(--panel-strong);
@@ -291,6 +435,12 @@ button:focus-visible {
   color: var(--warning);
 }
 
+.error-note.compact {
+  font-size: 13px;
+  margin-top: 0;
+  padding: 10px;
+}
+
 button:disabled {
   cursor: wait;
   opacity: 0.72;
@@ -300,6 +450,50 @@ button:disabled {
   color: var(--foreground) !important;
   font-size: 18px;
   font-weight: 700;
+}
+
+.ai-review {
+  background: #f8fbf8;
+}
+
+.review-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.review-heading h3 {
+  margin-bottom: 0;
+}
+
+.review-heading span {
+  background: var(--accent);
+  border-radius: 999px;
+  color: white;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+
+.ai-review dl {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 0;
+}
+
+.ai-review dl > div {
+  display: grid;
+  gap: 4px;
+}
+
+.ai-review dt {
+  color: var(--accent-strong);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ai-review dd {
+  line-height: 1.6;
+  margin: 0;
 }
 
 .auth-page {
