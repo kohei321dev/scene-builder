@@ -6,6 +6,7 @@ import { SignInButtons } from "@/components/sign-in-button";
 import {
   authOptions,
   canUsePractice,
+  isAuthConfigured,
   isGitHubAuthConfigured,
   isGoogleAuthConfigured,
   ownerGithubUsername,
@@ -38,16 +39,19 @@ function getAuthErrorMessage(error?: string): string | null {
 
 async function SignInContent({ searchParams }: Props) {
   const params = await searchParams;
-  const needsSetup = params.setup === "1";
-  const session = await getServerSession(authOptions);
+  const needsSetup = params.setup === "1" || !isAuthConfigured();
   const authErrorMessage = getAuthErrorMessage(params.error);
 
-  if (session && canUsePractice(session)) {
-    redirect("/");
-  }
+  if (!needsSetup) {
+    const session = await getServerSession(authOptions);
 
-  if (session) {
-    redirect("/denied");
+    if (session && canUsePractice(session)) {
+      redirect("/");
+    }
+
+    if (session) {
+      redirect("/denied");
+    }
   }
 
   return (
