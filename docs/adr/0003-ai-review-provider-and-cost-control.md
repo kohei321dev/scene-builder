@@ -24,10 +24,18 @@ AI ReviewはNext.js Route Handlerでserver-side実行する。
 
 ## Provider Notes
 
-「Glock」と言っているAPI keyが次のどちらかで、env名とendpointが変わる。
+「Grok」と言っているAPI keyはxAI Grok APIとして扱う。
 
+- xAI Grok APIの場合: `GROK_API_KEY` または `XAI_API_KEY`
 - GroqCloudの場合: `GROQ_API_KEY`
-- xAI Grok APIの場合: `XAI_API_KEY`
+- 初期modelは `GROK_MODEL=grok-4.3`
+- 英文添削は深い推論が不要なため、初期は `GROK_REASONING_EFFORT=none` とする
+- 同じxAI API key内でより安い/適したmodelが使える場合は、`GROK_MODEL` の環境変数だけで差し替える
+- 将来Claude Haikuなど別providerに切り替える場合は、provider adapterとenv keyを追加する
+
+2026-05-26時点のxAI公式docsでは、一般テキスト用途はGrok 4.3推奨で、
+旧fast系aliasもGrok 4.3側へ寄っている。短文添削MVPではmodel差し替え余地を残しつつ、
+まずはreasoning無効化と短い出力でコストを抑える。
 
 どちらでも、app側の設計は同じにする。
 
