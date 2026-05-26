@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Eye, RotateCcw, Sparkles } from "lucide-react";
+import { Check, Eye, Plus, RotateCcw, Sparkles } from "lucide-react";
 
 import type { SceneCard } from "@/lib/scenes";
 
 type Props = {
+  canAddCards?: boolean;
   cards: SceneCard[];
 };
 
@@ -29,11 +30,19 @@ type PracticeState = {
 type PracticeStates = Record<string, PracticeState>;
 
 const practiceStorageKey = "scene-builder.practice-state.v1";
+const customCardsStorageKey = "scene-builder.custom-cards.v1";
 
-export function ScenePractice({ cards }: Props) {
-  const [selectedCardId, setSelectedCardId] = useState(cards[0]?.id ?? "");
+export function ScenePractice({ canAddCards = false, cards }: Props) {
+  const [customCards, setCustomCards] = useState<SceneCard[]>([]);
+  const allCards = useMemo(() => [...cards, ...customCards], [cards, customCards]);
+  const [selectedCardId, setSelectedCardId] = useState(allCards[0]?.id ?? "");
   const [selectedLevel, setSelectedLevel] = useState("L1");
   const [answer, setAnswer] = useState("");
+  const [newCardCategory, setNewCardCategory] = useState("custom");
+  const [newCardSceneJa, setNewCardSceneJa] = useState("");
+  const [newCardTags, setNewCardTags] = useState("");
+  const [cardGenerationError, setCardGenerationError] = useState<string | null>(null);
+  const [isGeneratingCard, setIsGeneratingCard] = useState(false);
   const [showModel, setShowModel] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [needsReview, setNeedsReview] = useState(false);
@@ -47,8 +56,8 @@ export function ScenePractice({ cards }: Props) {
   const [loadedPracticeKey, setLoadedPracticeKey] = useState("");
 
   const selectedCard = useMemo(
-    () => cards.find((card) => card.id === selectedCardId) ?? cards[0],
-    [cards, selectedCardId],
+    () => allCards.find((card) => card.id === selectedCardId) ?? allCards[0],
+    [allCards, selectedCardId],
   );
 
   const selectedLevelData =
@@ -63,6 +72,24 @@ export function ScenePractice({ cards }: Props) {
   const formattedLastPracticedAt = formatLastPracticedAt(lastPracticedAt);
 
   const wordCount = answer.trim().split(/\s+/).filter(Boolean).length;
+
+  useEffect(() => {
+    setCustomCards(canAddCards ? readCustomCards() : []);
+  }, [canAddCards]);
+
+  useEffect(() => {
+    if (canAddCards) {
+      writeCustomCards(customCards);
+    }
+  }, [canAddCards, customCards]);
+
+  useEffect(() => {
+    const selectedCardExists = allCards.some((card) => card.id === selectedCardId);
+
+    if ((!selectedCardId || !selectedCardExists) && allCards[0]) {
+      setSelectedCardId(allCards[0].id);
+    }
+  }, [allCards, selectedCardId]);
 
   useEffect(() => {
     setPracticeStates(readPracticeStates());
@@ -188,14 +215,107 @@ export function ScenePractice({ cards }: Props) {
     }
   }
 
+  async function handleGenerateCard() {
+    const trimmedScene = newCardSceneJa.trim();
+
+    if (!trimmedScene) {
+      setCardGenerationError("シチュエーションを入力してください。");
+      return;
+    }
+
+    setIsGeneratingCard(true);
+    setCardGenerationError(null);
+
+    try {
+      const response = await fetch("/api/cards/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          category: newCardCategory.trim() || "custom",
+          sceneJa: trimmedScene,
+          tags: parseTags(newCardTags),
+        }),
+      });
+
+      const payload = (await response.json().catch(() => ({}))) as {
+        card?: SceneCard;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.card) {
+        throw new Error(payload.error || "カード生成に失敗しました。");
+      }
+
+      setCustomCards((current) => [...current, payload.card as SceneCard]);
+      setSelectedCardId(payload.card.id);
+      setSelectedLevel(payload.card.levels[0]?.level ?? "L1");
+      setNewCardSceneJa("");
+      setNewCardTags("");
+    } catch (error) {
+      setCardGenerationError(
+        error instanceof Error ? error.message : "カード生成に失敗しました。",
+      );
+    } finally {
+      setIsGeneratingCard(false);
+    }
+  }
+
   return (
     <div className="practice-shell">
       <aside className="scene-list" aria-label="シーン一覧">
         <div className="sidebar-heading">
           <span>Scenes</span>
-          <span>{cards.length}</span>
+          <span>{allCards.length}</span>
         </div>
-        {cards.map((card) => (
+        {canAddCards ? (
+          <div className="card-builder">
+            <div className="card-builder-heading">
+              <Plus aria-hidden="true" size={16} />
+              <span>カード追加</span>
+            </div>
+            <label>
+              <span>シチュエーション</span>
+              <textarea
+                onChange={(event) => {
+                  setNewCardSceneJa(event.target.value);
+                  setCardGenerationError(null);
+                }}
+                placeholder="例: 外国人の友達に今日の練習メニューを話す"
+                rows={4}
+                value={newCardSceneJa}
+              />
+            </label>
+            <label>
+              <span>カテゴリ</span>
+              <input
+                onChange={(event) => setNewCardCategory(event.target.value)}
+                value={newCardCategory}
+              />
+            </label>
+            <label>
+              <span>タグ</span>
+              <input
+                onChange={(event) => setNewCardTags(event.target.value)}
+                placeholder="practice;friend"
+                value={newCardTags}
+              />
+            </label>
+            <button
+              className="primary-button"
+              disabled={isGeneratingCard}
+              onClick={handleGenerateCard}
+            >
+              <Sparkles aria-hidden="true" size={16} />
+              {isGeneratingCard ? "生成中" : "AIで作成"}
+            </button>
+            {cardGenerationError ? (
+              <div className="error-note compact">{cardGenerationError}</div>
+            ) : null}
+          </div>
+        ) : null}
+        {allCards.map((card) => (
           <button
             className={
               card.id === selectedCard?.id ? "scene-list-item active" : "scene-list-item"
@@ -413,6 +533,90 @@ function getPracticeKey(cardId: string, level: string): string {
   return `${cardId}:${level}`;
 }
 
+function readCustomCards(): SceneCard[] {
+  try {
+    const rawValue = window.localStorage.getItem(customCardsStorageKey);
+
+    if (!rawValue) {
+      return [];
+    }
+
+    const value = JSON.parse(rawValue);
+
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value
+      .map(normalizeSceneCard)
+      .filter((card): card is SceneCard => Boolean(card));
+  } catch {
+    return [];
+  }
+}
+
+function writeCustomCards(cards: SceneCard[]) {
+  try {
+    if (cards.length === 0) {
+      window.localStorage.removeItem(customCardsStorageKey);
+      return;
+    }
+
+    window.localStorage.setItem(customCardsStorageKey, JSON.stringify(cards));
+  } catch {
+    // localStorage may be unavailable in restricted browser contexts.
+  }
+}
+
+function normalizeSceneCard(value: unknown): SceneCard | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const levels = Array.isArray(value.levels)
+    ? value.levels
+        .map(normalizeSceneLevel)
+        .filter((level): level is SceneCard["levels"][number] => Boolean(level))
+    : [];
+
+  if (levels.length === 0) {
+    return null;
+  }
+
+  return {
+    id: getString(value.id),
+    category: getString(value.category) || "custom",
+    sceneJa: getString(value.sceneJa),
+    promptEn: getString(value.promptEn),
+    promptJa: getString(value.promptJa),
+    tags: Array.isArray(value.tags)
+      ? value.tags.map(getString).filter(Boolean)
+      : [],
+    levels,
+  };
+}
+
+function normalizeSceneLevel(value: unknown): SceneCard["levels"][number] | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const level = getString(value.level);
+
+  if (!level) {
+    return null;
+  }
+
+  return {
+    level,
+    name: getString(value.name) || level,
+    constraints: getString(value.constraints),
+    answerEn: getString(value.answerEn),
+    answerJa: getString(value.answerJa),
+    reviewPoints: getString(value.reviewPoints),
+  };
+}
+
 function readPracticeStates(): PracticeStates {
   try {
     const rawValue = window.localStorage.getItem(practiceStorageKey);
@@ -494,6 +698,14 @@ function formatLastPracticedAt(value: string | null): string | null {
     dateStyle: "short",
     timeStyle: "short",
   }).format(date)}`;
+}
+
+function parseTags(value: string): string[] {
+  return value.split(";").map((tag) => tag.trim()).filter(Boolean).slice(0, 8);
+}
+
+function getString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

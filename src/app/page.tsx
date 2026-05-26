@@ -30,7 +30,7 @@ export default async function HomePage() {
             <span className="user-chip">@{ownerGithubUsername} dev</span>
           </div>
         </header>
-        <ScenePractice cards={cards} />
+        <ScenePractice canAddCards cards={cards} />
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default async function HomePage() {
           <SignOutButton />
         </div>
       </header>
-      <ScenePractice cards={cards} />
+      <ScenePractice canAddCards={role === "owner"} cards={cards} />
     </div>
   );
 }

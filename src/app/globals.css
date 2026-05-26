@@ -26,6 +26,7 @@ body {
 }
 
 button,
+input,
 textarea {
   font: inherit;
 }
@@ -132,6 +133,45 @@ button {
   font-size: 11px;
   font-weight: 700;
   gap: 6px;
+}
+
+.card-builder {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 12px;
+}
+
+.card-builder-heading {
+  align-items: center;
+  color: var(--accent-strong);
+  display: flex;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 8px;
+}
+
+.card-builder label {
+  display: grid;
+  gap: 6px;
+}
+
+.card-builder label span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card-builder input,
+.card-builder textarea {
+  min-height: 38px;
+}
+
+.card-builder textarea {
+  min-height: 104px;
 }
 
 .scene-list-item.active,
@@ -278,7 +318,18 @@ textarea {
   width: 100%;
 }
 
+input {
+  background: #fffefa;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--foreground);
+  min-height: 40px;
+  padding: 0 12px;
+  width: 100%;
+}
+
 textarea:focus,
+input:focus,
 button:focus-visible {
   outline: 3px solid rgba(31, 111, 91, 0.25);
   outline-offset: 2px;
@@ -355,6 +406,12 @@ button:focus-visible {
   background: #fff4ee;
   border-color: #edc7b4;
   color: var(--warning);
+}
+
+.error-note.compact {
+  font-size: 13px;
+  margin-top: 0;
+  padding: 10px;
 }
 
 button:disabled {
