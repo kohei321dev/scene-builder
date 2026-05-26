@@ -5,6 +5,7 @@ import { ScenePractice } from "@/components/scene-practice";
 import { SignOutButton } from "@/components/sign-in-button";
 import {
   authOptions,
+  canUsePractice,
   isAuthConfigured,
   isDevAuthBypassEnabled,
   isOwnerSession,
@@ -44,9 +45,11 @@ export default async function HomePage() {
     redirect("/signin");
   }
 
-  if (!isOwnerSession(session)) {
+  if (!canUsePractice(session)) {
     redirect("/denied");
   }
+
+  const role = isOwnerSession(session) ? "owner" : "guest";
 
   return (
     <div className="app-frame">
@@ -56,7 +59,11 @@ export default async function HomePage() {
           <span>場面から英文を組み立てる練習</span>
         </div>
         <div className="topbar-actions">
-          <span className="user-chip">@{session.user.githubLogin}</span>
+          <span className="user-chip">
+            {role === "owner"
+              ? `@${session.user.githubLogin} owner`
+              : `${session.user.email ?? session.user.googleEmail ?? "guest"} guest`}
+          </span>
           <SignOutButton />
         </div>
       </header>
