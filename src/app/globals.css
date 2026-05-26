@@ -114,6 +114,18 @@ button {
   width: 100%;
 }
 
+.scene-list-entry {
+  align-items: stretch;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 8px;
+}
+
+.scene-list-entry .scene-list-item {
+  margin-bottom: 0;
+}
+
 .scene-list-item small {
   color: var(--muted);
 }
@@ -368,6 +380,7 @@ button:focus-visible {
 
 .primary-button,
 .secondary-button,
+.icon-button,
 .icon-text-button {
   align-items: center;
   border-radius: 8px;
@@ -376,6 +389,20 @@ button:focus-visible {
   justify-content: center;
   min-height: 40px;
   padding: 0 14px;
+}
+
+.icon-button {
+  align-self: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  min-width: 40px;
+  padding: 0;
+}
+
+.icon-button.danger:hover {
+  border-color: #edc7b4;
+  color: var(--warning);
 }
 
 .primary-button {

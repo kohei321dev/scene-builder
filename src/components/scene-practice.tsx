@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Eye, Plus, RotateCcw, Sparkles } from "lucide-react";
+import { Check, Eye, Plus, RotateCcw, Sparkles, Trash2 } from "lucide-react";
 
 import type { SceneCard } from "@/lib/scenes";
 
@@ -262,6 +262,17 @@ export function ScenePractice({ canAddCards = false, cards }: Props) {
     }
   }
 
+  function handleDeleteCustomCard(cardId: string) {
+    const nextCards = customCards.filter((card) => card.id !== cardId);
+    setCustomCards(nextCards);
+
+    if (selectedCardId === cardId) {
+      const nextSelectedCard = allCards.find((card) => card.id !== cardId);
+      setSelectedCardId(nextSelectedCard?.id ?? "");
+      setSelectedLevel(nextSelectedCard?.levels[0]?.level ?? "L1");
+    }
+  }
+
   return (
     <div className="practice-shell">
       <aside className="scene-list" aria-label="シーン一覧">
@@ -315,25 +326,41 @@ export function ScenePractice({ canAddCards = false, cards }: Props) {
             ) : null}
           </div>
         ) : null}
-        {allCards.map((card) => (
-          <button
-            className={
-              card.id === selectedCard?.id ? "scene-list-item active" : "scene-list-item"
-            }
-            key={card.id}
-            onClick={() => {
-              const nextLevel = card.levels[0]?.level ?? "L1";
-              setSelectedCardId(card.id);
-              setSelectedLevel(nextLevel);
-            }}
-          >
-            <span>{card.sceneJa}</span>
-            <div className="scene-list-meta">
-              <small>{card.category}</small>
-              <SceneProgress card={card} states={practiceStates} />
+        {allCards.map((card) => {
+          const isCustomCard = customCards.some((customCard) => customCard.id === card.id);
+
+          return (
+            <div className="scene-list-entry" key={card.id}>
+              <button
+                className={
+                  card.id === selectedCard?.id
+                    ? "scene-list-item active"
+                    : "scene-list-item"
+                }
+                onClick={() => {
+                  const nextLevel = card.levels[0]?.level ?? "L1";
+                  setSelectedCardId(card.id);
+                  setSelectedLevel(nextLevel);
+                }}
+              >
+                <span>{card.sceneJa}</span>
+                <div className="scene-list-meta">
+                  <small>{isCustomCard ? `${card.category} / custom` : card.category}</small>
+                  <SceneProgress card={card} states={practiceStates} />
+                </div>
+              </button>
+              {canAddCards && isCustomCard ? (
+                <button
+                  aria-label={`${card.sceneJa}を削除`}
+                  className="icon-button danger"
+                  onClick={() => handleDeleteCustomCard(card.id)}
+                >
+                  <Trash2 aria-hidden="true" size={16} />
+                </button>
+              ) : null}
             </div>
-          </button>
-        ))}
+          );
+        })}
       </aside>
 
       <main className="practice-main">
