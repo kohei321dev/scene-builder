@@ -4,6 +4,10 @@
 
 目的は、スピーキングの前段にある「自分が言いたいことを短い英文にする力」を鍛えることです。まずはスケボー中に外国人の友達と話す場面を中心に、トピックカード、短い日記、難易度別の模範回答を蓄積します。
 
+## Production
+
+https://scene-builder-tau.vercel.app
+
 ## Current Direction
 
 - project name: `Scene Builder`
@@ -14,7 +18,7 @@
 - 方針: スピーキングだけでなく、短いライティングを先に鍛える
 - 初期教材: スケボー場面のトピックカードと短い日記プロンプト
 - 初期実装: 静的データをVercelなどで閲覧できる形にする
-- AI利用: 最初はChatGPT等で教材生成・添削し、リアルタイムAI採点は後続検討
+- AI利用: Grok/xAI APIで回答添削とowner向けカード生成を行う
 
 ## Learning Loop
 
@@ -58,7 +62,7 @@ Vercel Environment Variablesに次を設定します。
 - `NEXTAUTH_URL=https://your-vercel-url`
 - `OWNER_GITHUB_USERNAME=kohei321dev`
 
-`OWNER_GITHUB_USERNAME` と一致するGitHub loginだけがトップページを閲覧できます。
+`OWNER_GITHUB_USERNAME` と一致するGitHub loginはownerとして利用できます。Googleログインユーザーはguestとしてカード閲覧、回答、AI添削を利用できます。
 
 ## License
 
