@@ -1,8 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Eye, Plus, RotateCcw, Sparkles, Trash2 } from "lucide-react";
+import {
+  Check,
+  Eye,
+  Plus,
+  RotateCcw,
+  ShieldCheck,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 
+import type { RuntimeDiagnostics } from "@/lib/runtime-diagnostics";
 import type { SceneCard } from "@/lib/scenes";
 
 type Props = {
@@ -42,6 +51,9 @@ export function ScenePractice({ canAddCards = false, cards }: Props) {
   const [newCardSceneJa, setNewCardSceneJa] = useState("");
   const [newCardTags, setNewCardTags] = useState("");
   const [cardGenerationError, setCardGenerationError] = useState<string | null>(null);
+  const [diagnostics, setDiagnostics] = useState<RuntimeDiagnostics | null>(null);
+  const [diagnosticsError, setDiagnosticsError] = useState<string | null>(null);
+  const [isLoadingDiagnostics, setIsLoadingDiagnostics] = useState(false);
   const [isGeneratingCard, setIsGeneratingCard] = useState(false);
   const [showModel, setShowModel] = useState(false);
   const [isDone, setIsDone] = useState(false);
@@ -273,6 +285,31 @@ export function ScenePractice({ canAddCards = false, cards }: Props) {
     }
   }
 
+  async function handleLoadDiagnostics() {
+    setIsLoadingDiagnostics(true);
+    setDiagnosticsError(null);
+
+    try {
+      const response = await fetch("/api/diagnostics");
+      const payload = (await response.json().catch(() => ({}))) as {
+        diagnostics?: RuntimeDiagnostics;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.diagnostics) {
+        throw new Error(payload.error || "診断情報の取得に失敗しました。");
+      }
+
+      setDiagnostics(payload.diagnostics);
+    } catch (error) {
+      setDiagnosticsError(
+        error instanceof Error ? error.message : "診断情報の取得に失敗しました。",
+      );
+    } finally {
+      setIsLoadingDiagnostics(false);
+    }
+  }
+
   return (
     <div className="practice-shell">
       <aside className="scene-list" aria-label="シーン一覧">
@@ -324,6 +361,20 @@ export function ScenePractice({ canAddCards = false, cards }: Props) {
             {cardGenerationError ? (
               <div className="error-note compact">{cardGenerationError}</div>
             ) : null}
+            <div className="diagnostics-panel">
+              <button
+                className="secondary-button"
+                disabled={isLoadingDiagnostics}
+                onClick={handleLoadDiagnostics}
+              >
+                <ShieldCheck aria-hidden="true" size={16} />
+                {isLoadingDiagnostics ? "確認中" : "設定診断"}
+              </button>
+              {diagnosticsError ? (
+                <div className="error-note compact">{diagnosticsError}</div>
+              ) : null}
+              {diagnostics ? <DiagnosticsSummary diagnostics={diagnostics} /> : null}
+            </div>
           </div>
         ) : null}
         {allCards.map((card) => {
@@ -553,6 +604,56 @@ function SceneProgress({
       {doneCount > 0 ? <span>{doneCount}/{card.levels.length} 完了</span> : null}
       {hasReview ? <span>要復習</span> : null}
     </span>
+  );
+}
+
+function DiagnosticsSummary({
+  diagnostics,
+}: {
+  diagnostics: RuntimeDiagnostics;
+}) {
+  return (
+    <div className="diagnostics-summary">
+      <dl>
+        <DiagnosticsRow isReady={diagnostics.auth.configured} label="Auth" />
+        <DiagnosticsRow
+          isReady={diagnostics.auth.githubConfigured}
+          label="GitHub"
+        />
+        <DiagnosticsRow
+          isReady={diagnostics.auth.googleConfigured}
+          label="Google"
+        />
+        <DiagnosticsRow isReady={diagnostics.ai.apiKeyConfigured} label="AI key" />
+        <div>
+          <dt>Model</dt>
+          <dd>{diagnostics.ai.model}</dd>
+        </div>
+        <div>
+          <dt>Reasoning</dt>
+          <dd>{diagnostics.ai.reasoningEffort}</dd>
+        </div>
+        <div>
+          <dt>NEXTAUTH_URL</dt>
+          <dd>{diagnostics.auth.nextAuthUrlHost ?? "未設定"}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
+function DiagnosticsRow({
+  isReady,
+  label,
+}: {
+  isReady: boolean;
+  label: string;
+}) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd className={isReady ? "ok" : "warn"}>{isReady ? "OK" : "未設定"}</dd>
+    </div>
   );
 }
 

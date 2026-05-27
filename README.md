@@ -61,8 +61,21 @@ Vercel Environment Variablesに次を設定します。
 - `AUTH_SECRET`
 - `NEXTAUTH_URL=https://your-vercel-url`
 - `OWNER_GITHUB_USERNAME=kohei321dev`
+- `AUTH_GOOGLE_ID`
+- `AUTH_GOOGLE_SECRET`
+- `GROK_API_KEY`
+- `GROK_MODEL=grok-4.3`
+- `GROK_REASONING_EFFORT=none`
 
 `OWNER_GITHUB_USERNAME` と一致するGitHub loginはownerとして利用できます。Googleログインユーザーはguestとしてカード閲覧、回答、AI添削を利用できます。
+
+Google OAuth Clientには次のcallback URLを設定します。
+
+```text
+https://your-vercel-url/api/auth/callback/google
+```
+
+ownerログイン後、カード追加パネルの「設定診断」からAuth、Google、AI key、AI model、`NEXTAUTH_URL` の設定状態を確認できます。secret値そのものは表示しません。
 
 ## License
 

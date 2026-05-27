@@ -441,6 +441,53 @@ button:focus-visible {
   padding: 10px;
 }
 
+.diagnostics-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.diagnostics-summary {
+  background: #fffefa;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.diagnostics-summary dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.diagnostics-summary dl > div {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.diagnostics-summary dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.diagnostics-summary dd {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.diagnostics-summary .ok {
+  color: var(--accent-strong);
+}
+
+.diagnostics-summary .warn {
+  color: var(--warning);
+}
+
 button:disabled {
   cursor: wait;
   opacity: 0.72;
