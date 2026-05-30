@@ -24,6 +24,11 @@ export type RuntimeDiagnostics = {
   };
 };
 
+/**
+ * Collects current runtime configuration diagnostics for AI, authentication, and the database.
+ *
+ * @returns A `RuntimeDiagnostics` object containing `ai`, `auth`, and `database` sections that reflect the process environment and helper-detected configuration status.
+ */
 export function getRuntimeDiagnostics(): RuntimeDiagnostics {
   return {
     ai: {
