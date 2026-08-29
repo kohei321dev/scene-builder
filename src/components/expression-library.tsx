@@ -321,15 +321,12 @@ export function ExpressionLibrary({ entries: initialEntries }: Props) {
         <article className="library-entry" key={entry.id}>
           <div className="library-entry-heading">
             <div>
-              <p className="eyebrow">
-                {String(entry.situationSequence ?? 0).padStart(3, "0")}
-              </p>
-              <h2>{entry.inputJa}</h2>
-              <p className="library-situation-path">
-                <strong>{entry.primarySituation?.labelJa ?? "主未設定"}</strong>
-                <span aria-hidden="true">›</span>
-                <strong>{entry.secondarySituation?.labelJa ?? "副未設定"}</strong>
-              </p>
+              <h2>
+                {`${String(entry.situationSequence ?? 0).padStart(3, "0")} ${entry.primarySituation?.labelJa ?? "主未設定"} › ${entry.secondarySituation?.labelJa ?? "副未設定"}`}
+              </h2>
+              <details className="library-entry-input">
+                <summary title={entry.inputJa}>INPUT: {entry.inputJa}</summary>
+              </details>
             </div>
             <div className="library-entry-meta">
               <time dateTime={entry.registeredAt ?? entry.updatedAt}>
