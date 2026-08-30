@@ -2082,6 +2082,11 @@ button:disabled {
   margin: 0;
 }
 
+.library-entry-heading > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .capture-count,
 .library-status {
   background: var(--panel-strong);
@@ -2251,10 +2256,20 @@ button:disabled {
   max-width: 680px;
 }
 
-.library-entry-heading > div > p:not(.eyebrow) {
+.library-entry-input {
   color: var(--muted);
   line-height: 1.5;
   margin: 8px 0 0;
+  max-width: min(70ch, 100%);
+}
+
+.library-entry-input summary {
+  cursor: pointer;
+  padding-inline-start: 2px;
+}
+
+.library-entry-input > p {
+  margin: 6px 0 0;
 }
 
 .library-date {
