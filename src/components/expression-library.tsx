@@ -325,7 +325,8 @@ export function ExpressionLibrary({ entries: initialEntries }: Props) {
                 {`${String(entry.situationSequence ?? 0).padStart(3, "0")} ${entry.primarySituation?.labelJa ?? "主未設定"} › ${entry.secondarySituation?.labelJa ?? "副未設定"}`}
               </h2>
               <details className="library-entry-input">
-                <summary title={entry.inputJa}>INPUT: {entry.inputJa}</summary>
+                <summary>INPUT</summary>
+                <p>{entry.inputJa}</p>
               </details>
             </div>
             <div className="library-entry-meta">

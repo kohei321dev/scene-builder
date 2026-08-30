@@ -2265,15 +2265,11 @@ button:disabled {
 
 .library-entry-input summary {
   cursor: pointer;
-  overflow: hidden;
   padding-inline-start: 2px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.library-entry-input[open] summary {
-  overflow: visible;
-  white-space: normal;
+.library-entry-input > p {
+  margin: 6px 0 0;
 }
 
 .library-date {
