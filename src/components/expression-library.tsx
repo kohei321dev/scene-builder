@@ -199,7 +199,7 @@ export function ExpressionLibrary({ entries: initialEntries }: Props) {
   }
 
   async function archiveEntry(entry: ExpressionEntryDetail) {
-    if (!window.confirm(`「${entry.inputJa}」を一覧から削除しますか？`)) return;
+    if (!window.confirm(`${formatEntryHeading(entry)}を一覧から削除しますか？`)) return;
 
     setDeletingId(entry.id);
     setNotice(null);
@@ -322,7 +322,7 @@ export function ExpressionLibrary({ entries: initialEntries }: Props) {
           <div className="library-entry-heading">
             <div>
               <h2>
-                {`${String(entry.situationSequence ?? 0).padStart(3, "0")} ${entry.primarySituation?.labelJa ?? "主未設定"} › ${entry.secondarySituation?.labelJa ?? "副未設定"}`}
+                {formatEntryHeading(entry)}
               </h2>
               <details className="library-entry-input">
                 <summary>INPUT</summary>
@@ -501,4 +501,8 @@ function formatDate(value: string): string {
   return new Intl.DateTimeFormat("ja-JP", { dateStyle: "medium" }).format(
     new Date(value),
   );
+}
+
+function formatEntryHeading(entry: ExpressionEntryDetail): string {
+  return `${String(entry.situationSequence ?? 0).padStart(3, "0")} ${entry.primarySituation?.labelJa ?? "主未設定"} › ${entry.secondarySituation?.labelJa ?? "副未設定"}`;
 }
