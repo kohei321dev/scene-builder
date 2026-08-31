@@ -238,6 +238,24 @@ export function ExpressionCaptureForm({
         </p>
       </section>
 
+      <section className="capture-guide" aria-labelledby="capture-guide-title">
+        <h2 id="capture-guide-title">使い方</h2>
+        <ol>
+          <li>
+            <strong>INPUT</strong>
+            <span>日本語から英語表現を生成し、分類と候補を確認して保存します。</span>
+          </li>
+          <li>
+            <strong>LISTS</strong>
+            <span>保存した英文・和訳を編集し、EXPORT対象を選びます。</span>
+          </li>
+          <li>
+            <strong>EXPORT</strong>
+            <span>選択した英文を米国英語音声付きAPKGとして出力します。</span>
+          </li>
+        </ol>
+      </section>
+
       <form className="capture-form" onSubmit={captureAndGenerate}>
         <label className="capture-field capture-field-primary">
           <span>言いたいこと（日本語）</span>
