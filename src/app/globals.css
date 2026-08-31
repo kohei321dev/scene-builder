@@ -1982,6 +1982,41 @@ button:disabled {
   margin: 0;
 }
 
+.capture-guide {
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  padding: 18px 20px;
+}
+
+.capture-guide h2 {
+  font-size: 16px;
+  margin: 0 0 12px;
+}
+
+.capture-guide ol {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 22px;
+}
+
+.capture-guide li {
+  line-height: 1.5;
+  padding-left: 4px;
+}
+
+.capture-guide strong {
+  color: var(--accent-strong);
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.capture-guide span {
+  color: var(--muted);
+}
+
 .capture-form,
 .capture-review,
 .library-entry,
@@ -2506,6 +2541,15 @@ button:disabled {
   .capture-page,
   .library-page {
     padding: 32px 16px 56px;
+  }
+
+  .capture-guide {
+    padding: 16px;
+  }
+
+  .capture-guide strong {
+    display: block;
+    margin: 0 0 2px;
   }
 
   .capture-form,
