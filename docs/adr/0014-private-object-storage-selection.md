@@ -1,8 +1,9 @@
 # ADR 0014: Private object storage selection for APKG media
 
-- Status: Accepted
+- Status: Superseded
 - Date: 2026-07-21
 - Extends: ADR 0010 and ADR 0013
+- Superseded by: ADR 0017
 
 ## Context
 

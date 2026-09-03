@@ -12,17 +12,18 @@
 
 ADR本体は `docs/adr/` に集約する。機能別メモ、Issue、PRからADR番号へリンクする。
 
-## 移行中のプロダクト判断
+## 現行のプロダクト判断
 
-- `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`（Proposed）: Web UIを廃止し、外部resourceを変更せずrepository内の旧Web runtimeを先に全面撤去する。Acceptedになった時点でADR 0013〜0016の現行product・runtime判断を置き換える。
+- `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`（Accepted）: Web UIを廃止し、外部resourceを変更せずrepository内の旧Web runtimeを先に全面撤去した。Slack-firstの詳細は後続ADRで決める。
 
-ADR 0017がAcceptedになるまでは、次のADRがrepositoryに存在する旧runtimeの判断履歴である。新規機能の設計根拠としては使用せず、Slack-firstの詳細は後続ADRで決める。
+ADR 0013〜0016はADR 0017により現行product・runtime判断としてSupersededとなった。fileは当時の意思決定履歴として保持するが、新規機能の設計根拠としては使用しない。
 
-- `docs/adr/0016-situation-first-expression-and-anki-contract.md`: 主・副シチュエーション、semantic表現レイヤー、SayDeck 5フィールド、1音声、破壊的migration
-- `docs/adr/0013-expression-production-and-apkg-only.md`: INPUT / LISTS / EXPORT、アプリ内学習の廃止、APKG-only export
-- `docs/adr/0014-private-object-storage-selection.md`: 音声・APKGのprivate object storage選定、移行境界、見直し条件
-- `docs/adr/0011-rename-to-saydeck.md`: SayDeckへの名称変更
-- `docs/adr/0010-expression-capture-and-anki-export.md`: expression domainとAnki contract（学習統合・TSV・手動音声導線はADR 0013で置換）
+- `docs/adr/0016-situation-first-expression-and-anki-contract.md`: 旧主・副シチュエーション、表現レイヤー、Anki契約
+- `docs/adr/0015-situation-tag-taxonomy-and-anki-deck-hierarchy.md`: 旧シチュエーション分類とAnki deck階層
+- `docs/adr/0014-private-object-storage-selection.md`: 旧音声・APKG private storage選定
+- `docs/adr/0013-expression-production-and-apkg-only.md`: 旧INPUT / LISTS / EXPORTとAPKG-only product scope
+
+`docs/adr/0011-rename-to-saydeck.md`を含むそれ以前のADRも履歴として保持する。旧実装の詳細が必要な場合はGit履歴と併せて参照する。
 
 ## 書くタイミング
 

@@ -1,8 +1,9 @@
 # ADR 0016: Situation-first expression and Anki contract
 
-- Status: Accepted
+- Status: Superseded
 - Date: 2026-07-27
 - Supersedes: Anki field・分類・表現レイヤーに関するADR 0010、0012、0015の判断
+- Superseded by: ADR 0017
 
 ## Context
 
