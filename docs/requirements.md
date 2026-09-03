@@ -1,151 +1,101 @@
-# SayDeck 要求定義
+# SayDeck 移行要求
 
-- Status: Accepted
-- Date: 2026-07-27
-- Related: `docs/product-brief.md`, `docs/design.md`, `docs/specifications/anki-export.md`, `docs/adr/0016-situation-first-expression-and-anki-contract.md`
+- Status: Accepted direction / Rebuild pending
+- Date: 2026-09-04
+- Related: `docs/product-brief.md`, `docs/design.md`, `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
 
 ## 1. 目的
 
-日本語の`言いたいこと`を受け取り、実際の場面で使える英語表現へ変換し、Ankiで復習できる形式で蓄積・出力する。
+SayDeckを独立した英語学習Webサービスから、Slackなど実際に使う場所で英語表現を得て採否を記録するintegrationサービスへ再構築する。
 
-主要機能は次の2つに限定する。
+最初の成果は新機能ではなく、利用していない旧Web runtimeをrepositoryから全面撤去し、次期runtimeを旧data model・認証・deploymentへ依存せず設計できる状態にすることである。
 
-1. AIで英語表現を生成し、主・副シチュエーションで整理してDBへ保存する。
-2. 選択した表現を米国英語音声付きAPKGとして出力する。
+## 2. 実装順序
 
-UIはこの責務を`INPUT`、`LISTS`、`EXPORT`の3画面で表現する。
+### Phase 0: Legacy runtime cleanup
 
-## 2. 対象ユーザー
+[Issue #116](https://github.com/kohei321dev/saydeck/issues/116)で次を削除する。
 
-- Primary user: owner本人
-- Primary device: iOSブラウザ、必要に応じてdesktop browser
-- 利用場面: 移動中、会話後、スケートボード中など、表現を思いついた直後
-- 共有、共同編集、公開deckはMVP対象外
+- Next.jsのINPUT / LISTS / EXPORTと全Web画面
+- Web UI用Route HandlerとGitHub OAuth / NextAuth
+- Neon/Postgres schema、migration、store
+- 旧xAI生成、TTS、APKG、Vercel Blob実装
+- Next.js、Vercel、npm build、旧runtime専用設定・dependency・script
+- repository内のNeon専用agent skill
+- 旧runtimeを現行として扱うCI、PR確認項目、文書、link
 
-## 3. 画面
+cleanup後、新しいSlack runtimeが実装されるまで実行可能なSayDeckサービスが存在しない状態を許容する。
 
-| Screen | Route | Responsibility |
-| --- | --- | --- |
-| `INPUT` | `/input` | 日本語入力、AI生成、主・副分類と候補の確認、保存 |
-| `LISTS` | `/lists` | 一覧、検索、分類・日付filter、英文・和訳編集、削除、export選択 |
-| `EXPORT` | `/export` | 対象確認、en-US音声・APKG生成、download |
+### Phase 1以降: Slack-first rebuild
 
-`/`は`/input`へ遷移する。学習、添削、練習履歴、TSV、個別音声生成の導線を表示しない。
+次の要求候補は別ADR・別Issueで確定する。Issue #116の実装範囲には含めない。
 
-## 4. 機能要件
+- Slackの明示入力を受ける
+- Slackへ短時間でackし、LLM処理を非同期化する
+- 同じthreadへ英語1文を返す
+- 1 Bot messageを1候補としてreaction対象を一意にする
+- 採用・再生成を処理して保存する
+- provider、model、prompt versionと処理状態を追跡する
+- transportに依存しないdomain境界を作り、将来adapterを追加できるようにする
 
-### FR-1: INPUT
+## 3. Phase 0機能要件
 
-- 必須入力は1〜2,000文字の日本語`言いたいこと`。
-- 登録済み主シチュエーションを任意で優先できる。未選択ならAIが判断する。
-- 送信前に日本語入力と優先主IDをlocalStorageへ一時退避し、DB保存成功後に消す。
-- DB・通信・AI失敗時は入力を保持し、同じentryで生成を再試行できる。
-- ジャンル入力は存在しない。
+### CR-1: Repository runtime removal
 
-### FR-2: 主・副シチュエーション
+- `src/`と`db/`の旧runtimeをtracked fileから削除する。
+- 旧runtimeだけが使用するpackage、lockfile、config、env example、scriptを削除する。
+- runtimeがない状態を隠すための空package、常に成功するbuild、tombstone UIを作らない。
 
-- 主シチュエーションは広い場面、副シチュエーションは今回の目的・文脈を表す。
-- APIはownerのactiveな主分類一覧（ID、表示名、canonical key）をAIへ渡す。
-- AIは既存主に該当する場合だけそのIDを返し、該当しない場合は新規主の日本語名を返す。
-- 新規主はユーザーが保存を確定した時だけ作成する。
-- 副は1件必須。選択した主の配下へ新規作成する。
-- 同じ主の配下に副の基底名が完全一致する場合、最小未使用の`-001`、`-002`…を末尾へ付ける。意味的な類似だけでは統合しない。
-- 主・副はentryごとに各1件とし、登録後の分類変更はMVPで提供しない。
+### CR-2: Development workflow cleanup
 
-### FR-3: 意味単位と表現レイヤー
+- npm、Next.js、localhost、OAuth、Vercel、Neon、APKGを前提とするCIを削除またはruntime未実装の状態へ合わせる。
+- PR templateから旧Web runtime固有の確認項目を除く。
+- Neon専用repository skillとlock情報を削除する。
 
-- 1つの日本語入力で意図を表すために複数の独立した英文が必要な場合、AIは最大8件の意味単位へ分割する。
-- 各意味単位は次のvariantを持つ。
+### CR-3: Documentation boundary
 
-| Code | Display | Required | Generation rule |
-| --- | --- | --- | --- |
-| `standard` | `01_標準表現` | Yes | 1文・原則18語以内・発話行為1つ。入力の意図に必要な詳細を含め、その場で使える標準的な英文にする |
-| `native` | `02_ネイティブ・口語表現` | No | 01と同じ意図を、会話で使われる省略・定型句・自然な語順で表す。明確な差がある場合だけ1件 |
-| `pattern` | `03_表現パターン` | No | 01を土台に、03a〜03cの学習パターンを使った完成英文を生成。解説や語句断片だけのカードは禁止 |
+- README、Product Brief、要求、設計はWeb UIを現行productとして案内しない。
+- 過去ADRは削除せず、意思決定履歴として保持する。
+- APKG仕様、Vercel deployment、旧UIUX・observability文書を現行正本から外す。
+- 新しいSlack / Google Cloud設計が未実装・未確定であることを明示する。
 
-`pattern`のpattern_codeは次の3種類です。`a` 文法展開、`b` 熟語・句動詞、`c` コロケーション。03cはモデルの米国英語知識に基づく一般的な語の組み合わせを扱い、MVPでは外部コーパス検索を行いません。入力に適用できるパターンだけ最大3件返します。
+### CR-4: External resource isolation
 
-- 任意レイヤーのカード作成は任意だが、AIは意味単位ごとに`native`、`pattern_a`、`pattern_b`、`pattern_c`を必ず評価する。
-- 各評価は`applicable`と日本語の理由を返し、`applicable=true`の場合だけ完成英文と和訳を返す。falseの場合は本文を返さない。
-- 4対象がすべてfalseでstandardしか得られなかった意味単位は、意味単位・standardを固定したまま1度だけ再評価する。
-- 任意レイヤーに実用上の差がなければ生成しない。数合わせの類似文を禁止する。
-- `pattern`は意味単位ごとに`pattern_code`（`a`〜`c`）で識別し、適用可能なパターンだけ複数保持する。
-- 各variantは`expressionEn`と`translationJa`だけを本文正本として持つ。基本ワードと例文を分離しない。
-- `anki_guid`と仮Indexはシステムがvariant作成時に生成する。
-- AI responseはJSON SchemaによるStructured Outputsで受け、評価理由は生成時の検証にのみ使いDBへ永続化しない。
+cleanupは次を変更しない。
 
-### FR-4: REVIEWと登録
+- Vercel Project、deployment、domain、Environment Variables
+- Neon Project、database、data
+- Vercel Blob storeとartifact
+- GitHub OAuth App
+- Slack App、token、Signing Secret、Request URL
+- Google Cloud resource
 
-- ユーザーはAI提案後に主1件、副1件、英文候補を確認する。
-- `standard`は各意味単位で必須選択とし、画面から解除できない。
-- `standard`は、必要な詳細を含む標準的で単独利用できる表現レイヤーである。複数の発話行為が必要な日本語入力は意味単位へ分ける。
-- 保存transaction内で主・副作成、entryとの対応、主分類内連番、選択状態、登録日時を確定する。
-- `situation_sequence`はowner・主シチュエーションごとの入力連番とする。
-- 表示上の意味単位番号は`001-01`形式とし、999を超えたら`1000-01`へ自然に拡張する。
-- `anki_index`は主分類のcanonical key、入力連番、意味単位位置、表現レイヤー、expression patternを含む一意な恒久値とする。
+repositoryから設定名やadapterを削除することと、外部resourceを削除することを同一視しない。
 
-### FR-5: LISTS
+## 4. 非機能要件
 
-- 登録済みentryを一覧表示する。
-- 主シチュエーション、副シチュエーション、表現レイヤー、登録日、キーワードを組み合わせて絞り込める。
-- キーワードは日本語入力、分類名、英文、和訳を検索対象とする。
-- 英文・和訳を編集できる。英文変更時は対応音声を`stale`にする。
-- entryは論理削除でき、子データと過去export参照を保全する。
-- variantを個別・一括選択し、sessionStorageでEXPORTへ引き継ぐ。
+- `.env.local`、API key、OAuth secret、DB connection string、Blob token、raw provider payloadを読まない。
+- userが作成した未追跡fileと別worktreeを変更しない。
+- cleanupはGit履歴から旧実装を参照・復元できる形で通常のcommitとして行う。
+- unrelatedなGoogle CloudまたはSlack implementationをcleanup commitへ混在させない。
 
-### FR-6: 米国英語音声
+## 5. Phase 0非対象
 
-- variantごとに`Expression`全文を読む音声を1件だけ持つ。
-- TTS requestはlanguage `en`、locale metadata `en-US`、model、voice、speed、WAV formatをserver側で固定する。
-- 日本語voice、OS・browser既定voice、locale未指定fallbackをAPKGへ含めない。
-- 本文とTTS設定のhashが一致するready assetだけを再利用する。
-- 音声生成に失敗したvariantを無音でpackageへ含めず、再試行可能なexport失敗とする。
+- 新しいSlack Botの実装
+- Google Cloud architectureの確定・resource作成
+- LLM/TTS providerの選定・比較
+- Firestore schemaの確定
+- Discord、公開REST API、MCP、CLI integration
+- 将来のAnki連携を維持または廃止する最終判断
+- 外部Vercel・Neon・Blob・OAuth resourceの停止・削除
+- 旧Issue・PRの自動close
 
-### FR-7: APKG
+## 6. Phase 0 release gates
 
-- Note typeは`SayDeck`、1 noteにつき1 card。
-- field順は`Index`, `Context`, `Expression`, `Translation`, `expression_audio`の5件。
-- `Context`はexport時に主・副・表現レイヤーから生成し、DBへ重複保存しない。
-- FrontはContext、Expression、en-US音声。BackはContextとTranslationだけで音声を置かない。
-- Deckは`SayDeck::主シチュエーション::副シチュエーション::表現レイヤー`。
-- Tagsは`source`、`primary_situation`、`secondary_situation`、`layer`。ジャンルtagは出力しない。
-- DBの`anki_guid`と`anki_index`を再exportでも再利用する。
-- 正式出力はAPKGだけ。TSV、CSV、個別WAV endpointを提供しない。
-
-## 5. 非機能要件
-
-- Neon/Postgresを構造化データの正本とする。
-- 音声binaryとAPKGはprivate object storageへ保存し、DBにはpathとmetadataだけを持つ。
-- API key、connection string、Blob token、raw AI response、署名URLをlogへ出さない。
-- 主要操作はiOS縦画面で横スクロールせず実行できる。
-- 主・副分類作成、連番、副suffix採番をtransactionとDB unique制約で保護する。
-- owner scopeを全query・mutationで検証する。
-
-## 6. 非対象
-
-- アプリ内学習、英作文添削、採点、復習キュー
-- 分類マスタ専用管理画面
-- 初回export後の分類変更とAnki deck自動移動
-- TSV、CSV、個別WAV、日本語TTS、発音採点
-- AnkiConnectやAnkiWebへの直接同期
-- 共有、共同編集、公開deck
-
-## 7. Migration
-
-`0008-situation-first-expression-contract.sql`で既存SayDeck表現・音声metadata・APKG履歴を削除し、次を物理的に廃止する。
-
-- `genre_slug`, `situation_ja`, `situation_tags`
-- L1〜L4 profile code
-- 基本ワード・例文用の旧variant列
-- `word`/`sentence`の2音声構造
-
-旧practice系テーブルとmigrationは履歴・復旧用に保持し、現行UIから参照しない。
-
-## 8. Release gates
-
-- `lint`、`typecheck`、production `build`が成功する。
-- Fixture 001〜003で主分類内連番、複数意味単位、任意レイヤー省略を確認する。
-- 同じ副基底名の2回目が`-001`になる。
-- 生成音声を人間が試聴し、米国英語であることを確認する。
-- 空のAnki profileで初回import、Context、deck階層、表面音声、裏面無音を確認する。
-- 同一variantを再export・再importし、重複しないことを確認する。
+- `git diff --check`が成功する。
+- tracked file一覧に旧Web UI・API・database・APKG runtimeが残っていない。
+- dependency・設定一覧にNext.js、React、NextAuth、Postgres、Vercel Blob、Anki/APKG、sql.jsが残っていない。
+- GitHub Actionsが存在する場合、削除済みnpm runtimeを要求しない。
+- READMEと現行docsに利用可能なINPUT / LISTS / EXPORT、localhost、Production Web UIの案内がない。
+- historical ADR以外の現行文書から旧runtimeへの有効linkがない。
+- 外部resourceを変更していない。

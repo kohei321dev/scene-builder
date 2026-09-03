@@ -1,5 +1,9 @@
 # Vercel Deployment
 
+- Status: Legacy / External resources unchanged
+
+> この文書は旧Web runtimeの運用履歴である。ADR 0017とIssue #116はrepository内のruntimeを撤去するが、Vercel Project、既存deployment、domain、Environment Variables、Neon、Blob、GitHub OAuth Appを削除・変更しない。次期Slack runtimeのdeployment手順として使用しない。
+
 ## Naming boundary
 
 [事実] local project directory、npm package、GitHub remote repositoryは`saydeck`である。Vercel project名は既存の`saydecks`を維持する。
