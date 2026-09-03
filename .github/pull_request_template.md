@@ -1,20 +1,24 @@
-## Summary
+## 概要
 
-<!-- 変更概要を箇条書きで書く -->
+<!-- 変更した内容と理由を簡潔に記載する -->
 
-## Related Issue
+## 関連Issue
 
 <!-- Closes # -->
 
-## Validation
+## 対象・対象外
 
-- [ ] `npm run lint`
-- [ ] `npm run typecheck`
-- [ ] `npm run build`
-- [ ] `DEV_AUTH_BYPASS=1 npm run dev` で `http://localhost:3000` の主要UIを確認した
+- 対象:
+- 対象外:
 
-## OAuth / Deployment
+## 検証
 
-- [ ] PR Preview URLでのOAuthログイン確認を必須にしていない
-- [ ] OAuth変更がある場合、merge後にProduction正式ドメインで確認する項目を記載した
-- [ ] secret、token、client secret、raw provider payloadを本文や差分に含めていない
+- [ ] Issueの完了条件に対応する検証を実行した
+- [ ] `git diff --check`が成功した
+- [ ] 文書を変更した場合、現行正本とlinkを確認した
+- [ ] 実行できない検証と理由を本文へ記載した
+- [ ] secret、token、connection string、raw provider payloadを差分や本文に含めていない
+
+## 外部変更
+
+<!-- cloud resource、権限、secret、外部Appを変更していなければ「なし」と記載する -->
