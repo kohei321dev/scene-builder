@@ -1,58 +1,72 @@
 # Product Brief: SayDeck
 
-- Status: Accepted
-- Updated: 2026-07-27
+- Status: Accepted direction / Rebuild pending
+- Updated: 2026-09-04
+- Decision: `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
 
 ## Product statement
 
-SayDeckは、現実の場面で言いたかったことを日本語で入力し、AIによってAnkiで振り返りやすい英語表現へ変換・整理し、米国英語音声付きAPKGとして書き出す個人向けアプリである。
+SayDeckは、Slackなど普段使う場所で発生した「日本語では言いたいことがあるが、英語ですぐ表現できない」という瞬間を捉え、その場で使える英語1文を同じ会話へ返し、採用・再生成・修正などの判断を個人の表現dataとして記録するowner向けintegrationサービスである。
+
+SayDeckの本体は汎用的な英語生成AIではない。利用場面、生成、返信、採否記録、将来の外部教材連携をつなぐ接着部分である。
 
 ## Problem
 
-学習者は既知の単語や文法を持っていても、実際の場面で自分の意図を自然な英文として組み立てることが難しい。思いついた内容を一般的な単語帳へ手作業で移すと、場面の文脈と発話意図が失われやすい。
+独立したWeb UIでは、英語を必要とした瞬間とSayDeckを開く瞬間が分離する。添削、文脈保持、教材管理、音声生成そのものは既存AIサービスやAnkiで代替できるため、INPUT / LISTS / EXPORTを備えた別のWebサービスを維持する価値が小さい。
 
-SayDeckの責務はアプリ内学習ではない。現実の気づきを、Ankiで復習できる高品質な英語表現へ変換することである。
+一方、実際の会話があるSlackから明示的な意図を渡し、同じthreadで候補を受け取り、その場の判断を記録する流れは、利用者が別画面へ移らずに完結する。
 
-## Core experience
+## Target experience
 
-### INPUT
+### Capture
 
-ユーザーは`言いたいこと`を日本語で入力する。以前使った主シチュエーションを任意で優先できる。AIは登録済み主分類と照合し、主・副シチュエーション、必要な意味単位、必須の`01_標準表現`を提案する。さらに各意味単位で`02_ネイティブ・口語表現`と`03a〜03c`を必ず適用判定し、差がある完成英文だけを候補にする。01は1文・原則18語以内で必要な詳細を含む、その場で使える標準表現とする。複数の発話行為は意味単位へ分割する。ユーザーが分類と候補を確認した時点でDBへ登録する。
+ownerはSlackでSayDeckへ、日本語の`言いたいこと`、用途、任意のtoneを明示する。SayDeckは周辺会話を無断取得せず、ownerが明示的に渡した内容だけを入力とする。
 
-### LISTS
+### Suggest
 
-保存済み表現を主・副シチュエーション、表現レイヤー、登録日、キーワードで絞り込む。英文・和訳を編集し、不要な入力を一覧から削除し、APKGへ含めるvariantを選ぶ。
+SayDeckは同じthreadへ、その場で送信できる英語1文を返す。reaction対象を一意にするため、1つのBot messageには1候補だけを表示する。
 
-### EXPORT
+### Decide
 
-選択した英文を米国英語で読み上げ、`SayDeck::主::副::表現レイヤー`のdeckと5フィールドのSayDeckノートへ投影する。音声とカードは単一APKGへ同梱し、WAVやTSVを個別に扱わせない。
+ownerはreactionまたはthread返信で候補を扱う。
+
+- 採用: 候補を保存する
+- 再生成: 別案を新しいBot messageとして1件作る
+- 修正: threadの明示的な修正指示から新候補を作る
+- 音声・説明: core flowの成立後に追加を検討する
+
+### Reuse
+
+採用した表現はsourceに依存しないdomain dataとして保持し、将来Slack以外のadapter、Discord、CLI/API、Ankiなどから利用できる余地を残す。具体的な公開APIとAnki連携方式は未決定とする。
+
+## Current transition
+
+最初の変更は[Issue #116](https://github.com/kohei321dev/saydeck/issues/116)である。現行Web UI、API、GitHub OAuth、Neon、APKG、Vercel runtimeをrepositoryから撤去し、新runtimeが実装されるまでサービス不在の期間を許容する。
+
+Vercel Project、Neon Project、Blob、GitHub OAuth App、Slack Appなどの外部resourceはこのcleanupでは変更しない。
 
 ## Success measures
 
-- 日本語入力が通信・DB障害時にも端末へ残る。
-- 長い入力を必要な複数意味単位へ分けられる。
-- `01_標準表現`は必ず存在し、任意レイヤーは類似文の水増しにならない。
-- `02_ネイティブ・口語表現`は、ネイティブ話者が実際に使う自然な定型句・省略・語順に限定する。
-- `03_表現パターン`は、文法展開、熟語・句動詞、自然な米国英語で一般的なコロケーションの完成英文だけを扱う。
-- 任意候補が0件の場合も4対象を評価済みであり、standardだけの結果は1度再評価される。
-- 主分類は再利用でき、副分類の完全重複には`-001`以降が付く。
-- LISTSで英文が読みやすく、編集・削除・絞り込み・export選択ができる。
-- Ankiカードの表裏に主・副・表現レイヤーが表示される。
-- 表面は英語とen-US音声、裏面は日本語訳だけを表示する。
-- 同一variantの再export・再importでカードが重複しない。
+- ownerが別のWeb UIを開かず、Slack内で1件の候補を得られる。
+- どの入力・候補・reactionを処理しているかmessage単位で一意に追跡できる。
+- Slackの再送やworkerの再試行でも同じ候補・保存dataが重複しない。
+- owner以外のeventを処理しない。
+- 採用候補にprovider、model、prompt versionを記録できる。
+- raw Slack本文、secret、provider responseをapplication logへ出さない。
 
 ## Product boundaries
 
-- 初期版はowner本人向け。
-- アプリ内学習、AI添削、採点、復習間隔管理はAnkiの責務とする。
-- TSV、CSV、個別WAV、日本語TTS、発音採点、直接Anki同期は対象外。
-- 主・副分類を直接管理する専用画面はMVP対象外。
-- 初回export後の分類変更による既存Ankiカードのdeck自動移動は保証しない。
+- 初期版はowner本人と許可済みSlack workspaceだけを対象にする。
+- Web UI、Web設定画面、アプリ内学習、採点、復習queueを持たない。
+- SayDeckがSlack channelの周辺会話を自動収集することはしない。
+- Discord、公開API、Codex・Claude Code連携はSlack core flowの後に検討する。
+- 音声、説明、provider切替、Anki exportはcleanup Issue #116に含めない。
+- 外部cloud resourceの削除はrepository cleanupと分離する。
 
 ## Source of truth
 
-- 要求定義: `docs/requirements.md`
-- 設計: `docs/design.md`
-- Anki外部仕様: `docs/specifications/anki-export.md`
-- UI/DBフロー: `docs/uiux/proposed-situation-first-data-flow.html`
-- 現行ADR: `docs/adr/0016-situation-first-expression-and-anki-contract.md`
+- 移行要求: `docs/requirements.md`
+- 移行設計: `docs/design.md`
+- 判断: `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
+- 旧APKG仕様: `docs/specifications/anki-export.md`（legacy）
+- 旧Vercel運用: `docs/vercel-deployment.md`（legacy）

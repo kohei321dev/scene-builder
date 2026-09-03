@@ -1,216 +1,104 @@
-# SayDeck 設計
+# SayDeck 移行設計
 
-- Status: Accepted
-- Date: 2026-07-27
+- Status: Proposed
+- Date: 2026-09-04
 - Requirements: `docs/requirements.md`
-- Anki contract: `docs/specifications/anki-export.md`
-- Decision: `docs/adr/0016-situation-first-expression-and-anki-contract.md`
+- Decision: `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
+- Implementation Issue: [#116](https://github.com/kohei321dev/saydeck/issues/116)
 
-## 1. Architecture
+## 1. Transition architecture
 
 ```text
-INPUT
-  inputJa + optional preferred primary ID
-  → POST /api/expressions
-  → active primary list + inputJa → AI structured generation
-  → REVIEW in browser
-  → PATCH /api/expressions/:id
-  → situation + sequence + selected variants committed atomically
+現在
+  Next.js Web UI / API
+  + GitHub OAuth
+  + Neon/Postgres
+  + xAI / TTS
+  + Vercel Blob / APKG
 
-LISTS
-  registered entries + situation joins
-  → client filter / edit / archive / export selection
+Phase 0
+  repositoryから旧runtimeを全面撤去
+  → docsと開発運用fileだけの再構築状態
+  → 実行可能なSayDeck runtimeなし
 
-EXPORT
-  selected variant IDs
-  → expression en-US TTS
-  → 5-field Anki projection
-  → private APKG storage
-  → authenticated download
+将来
+  Slack-first integration runtime
+  → 別ADR・別Issueで設計、実装
 ```
 
-Next.js App RouterのServer Componentsが初期データを読み、対話部分だけClient Componentsへ渡す。DB、AI、TTS、private storageはRoute Handlerまたはserver moduleからだけ利用する。
+Phase 0は移植ではなく撤去である。旧moduleを将来用として残したり、Web routeを非表示にするだけの互換layerを作ったりしない。
 
-## 2. UI boundaries
+## 2. Deletion map
 
-| Route | Responsibility |
-| --- | --- |
-| `/input` | 日本語入力、既存主の任意優先、AI生成、分類・候補確認、登録 |
-| `/lists` | 登録済みentryの絞り込み、英文・和訳編集、論理削除、export選択 |
-| `/export` | 選択確認、音声・APKG生成、download |
-
-`/api/situations`はownerのactiveな主・副分類を返す。分類専用管理画面は持たない。
-
-## 3. Database
-
-### Current expression domain
-
-| Table | Responsibility | Important constraints |
+| Area | Phase 0 action | Reason |
 | --- | --- | --- |
-| `generation_profiles` | semantic expression layer rules | codeは`standard/native/pattern`。`standard`は1文・原則18語以内・発話行為1つ。`pattern`は03a〜03cを使う |
-| `expression_entries` | 日本語入力と登録状態 | registered時に`situation_sequence`必須 |
-| `sentence_cards` | 入力を分けた意味単位 | owner・entry・position unique |
-| `sentence_variants` | 意味単位ごとの英文・和訳 | card・profile・pattern unique、GUID unique、owner・Index unique |
-| `situation_definitions` | owner別の主・副分類master | 主key unique、副はparent・label unique |
-| `expression_entry_situations` | entryへの主・副割当 | entry・role primary key、同じsituationの重複禁止 |
-| `situation_sequence_counters` | 主分類内の入力連番 | owner・primary ID primary key |
-| `audio_assets` | variantごとのExpression音声metadata | owner・variant unique |
-| `anki_exports` | APKG artifact状態 | owner scope、private path |
+| `src/app/**` | 削除 | 全Web画面、Route Handler、NextAuth endpointが旧product境界 |
+| `src/components/**` | 削除 | INPUT / LISTS / EXPORT専用UI |
+| `src/lib/**` | 削除 | 旧Web、Neon、APKG契約へ結合したserver module |
+| `src/types/**` | 削除 | NextAuth専用型 |
+| `db/**` | 削除 | 外部Neon dataは残すが、旧schemaのrepository migrationは利用しない |
+| `scripts/**` | 削除 | APKG/WASM build専用 |
+| Node / Next / Vercel config | 削除 | cleanup後にNode runtimeを提供しない |
+| `.env.example` | 削除 | 旧runtimeのsecret・接続設定だけを案内している |
+| Neon repository skills | 削除 | 次期Google Cloud設計で使用しない旧database専用resource |
+| CI / PR template | 整理 | 存在しないnpm、UI、OAuth検証を要求させない |
+| 旧active docs | 削除またはlegacy化 | 次期仕様の正本と誤認させない |
 
-### Situation invariants
+## 3. Retained map
 
-- `primary`: `parent_id is null`
-- `secondary`: `parent_id is not null`
-- application transactionは副のparentが選択主と一致し、両分類のownerがentry ownerと一致することを検証する。
-- 新規主は正規化labelのstable hashからcanonical keyを作る。ASCII labelを含む場合は可読slugを使う。
-- 副の完全重複はtransaction-scoped advisory lockで直列化し、未使用最小の`duplicate_sequence`を割り当てる。
-- 主分類内連番はcounter tableのatomic upsertで採番する。
+| Area | Retention rule |
+| --- | --- |
+| `.git` history | 旧runtimeの復元・参照経路として保持 |
+| `LICENSE` | repositoryのlicenseとして保持 |
+| `docs/adr/**` | 過去判断を時系列で追跡するため保持 |
+| Product Brief / requirements / design | Slack-firstの方向と移行状態を示す文書として保持 |
+| generic GitHub settings | 次期implementationにも有効なものだけ保持 |
 
-### Variant identity
+## 4. External boundary
 
-- `anki_guid`: variant作成時に一度生成するAnki note GUID。
-- `anki_index`: 登録時に`primary canonical key + situation sequence + meaning position + layer ordinal + expression pattern ordinal`から作り、以後変更しない。
-- 画面上の短い番号は`situation_sequence`と`sentence_cards.position`から`001-01`のように表示する。
-- AIはGUID、Index、suffix、sequenceを生成しない。
-
-## 4. AI generation contract
-
-AI input:
-
-- `inputJa`
-- activeな主分類の`id`, `labelJa`, `canonicalKey`
-- 任意のpreferred primary ID
-- semantic generation profile definitions
-- 再生成時だけ固定した意味単位
-
-AI output:
-
-```ts
-{
-  primarySituationId: string | null
-  primaryLabelJa: string
-  secondaryBaseLabelJa: string
-  segments: Array<{
-    intentJa: string
-    standard: {
-      profileCode: "standard"
-      patternCode: "default"
-      expressionEn: string
-      translationJa: string
-    }
-    alternatives: Array<{
-      target: "native" | "pattern_a" | "pattern_b" | "pattern_c"
-      applicable: boolean
-      reasonJa: string
-      expressionEn: string | null
-      translationJa: string | null
-    }>
-  }>
-}
-```
-
-server validation:
-
-- xAI Responses APIの`text.format.type=json_schema`を使い、strictなStructured Outputsとして受け取る。
-- segmentは1〜8件。
-- 各segmentに`standard`が1件必須。
-- `standard`は必要な詳細を含み、その場で単独利用できる1発話とする。原則1文・18語以内に収め、独立した複数の内容はsegmentへ分ける。
-- alternativesは4対象を重複なく必ず評価する。`applicable=true`なら英文・和訳必須、falseなら両方nullとする。
-- `native`は各segmentで1件まで。`pattern`はpatternCode a〜cごとに1件まで。
-- `pattern`は適用可能なものだけvariantへ変換し、03a〜03cの数合わせを禁止する。すべて完成英文とし、解説や語句断片を返さない。
-- 4対象がすべてfalseのsegmentがあれば、意味単位と初回standardを固定して1回だけ再評価し、追加候補だけを初回結果へmergeする。
-- 評価理由はgeneration responseの検証用でありDBには保存しない。
-- existing primary IDは実際に渡した一覧内だけ許可する。
-- primary labelとsecondary base labelは空不可、120文字以内。
-- ExpressionとTranslationは空不可、2,000文字以内。
-
-AIの分類提案はgeneration responseとしてREVIEWへ返し、分類masterは変更しない。ユーザーのPATCH確定時だけ分類を永続化する。
-
-Grok 4.3のreasoning effortは`OWNER_AI_EFFORT`で`low`、`medium`、`high`を選べる。未設定・不正値・旧`none`値は品質下限として`medium`へ正規化する。03cはモデルの米国英語知識に基づくコロケーション判定であり、MVPでは外部コーパスを検索しない。
-
-## 5. Store transaction
-
-初回登録の`approveExpressionEntry`は1 transaction内で次を行う。
-
-1. entryを`for update`でlockする。
-2. selected variantがentryに属することを検証する。
-3. 各意味単位の`standard`選択を検証する。
-4. 英文・和訳の修正を保存し、英文変更時は音声をstaleにする。
-5. 既存主を検証または新規主を作成する。
-6. 副を作成し、完全一致なら3桁suffixを採番する。
-7. 主・副assignmentを保存する。
-8. 主分類内`situation_sequence`を採番する。
-9. 全variantの恒久`anki_index`を確定する。
-10. selected状態とentryのregistered状態を保存する。
-
-登録済みentryのPATCHでは分類とsequenceを変更せず、英文・和訳・選択状態だけを更新する。
-
-## 6. Audio
-
-`registerSentenceVariantAudio`はvariantの`expression_en`を読む音声1件だけを扱う。
-
-- provider: xAI Text to Speech
-- request language: `en`
-- stored locale: `en-US`
-- format: WAV / 24kHz
-- hash input: text、model、voice、locale、speed、format
-- valid cache: provider・locale・hashが一致する`ready` asset
-
-browser speechへのfallbackはない。Productionではprivate Blob、developmentでは`.saydeck-storage`を利用できる。
-
-## 7. Anki projection
-
-DBから次へ投影する。
+Phase 0のcommitやcommandは外部resourceを直接削除・変更しない。
 
 ```text
-sentence_variants.anki_index → Index
-primary/secondary/layer labels → Context
-sentence_variants.expression_en → Expression
-sentence_variants.translation_ja → Translation
-audio_assets → expression_audio
+Repository cleanup                         External state
+--------------------------------------     -----------------------------
+delete Neon adapter/migration          != delete Neon Project/data
+delete Vercel config                   != delete Vercel Project/domain
+delete Blob adapter                    != delete Blob objects/store
+delete NextAuth code                   != delete GitHub OAuth App
+delete Slack draft code                != delete installed Slack App
 ```
 
-Deck:
+Vercelの既存Git連携がmain更新を検知する可能性はあるが、外部設定変更や既存deployment削除は行わない。Production Web UIを実際に停止・削除する作業は別Issueで扱う。
+
+## 5. Historical documentation
+
+- ADR 0013〜0016はADR 0017がAcceptedになった時点で現行判断ではなくなるが、file自体は削除しない。
+- `docs/specifications/anki-export.md`と`docs/vercel-deployment.md`はlegacy文書として扱う。
+- `docs/uiux/**`と`docs/observability/**`はPhase 0 implementationでactive referenceを確認し、次期設計に不要なら削除する。
+- 過去文書から有用な安全設計を再利用するときは、次期ADRへ判断として書き直す。旧文書を暗黙の現行契約にしない。
+
+## 6. Candidate next architecture
+
+次は方向性を示す候補であり、Issue #116では実装しない。
 
 ```text
-SayDeck::主シチュエーション::副シチュエーション::表現レイヤー
+Slack Events API
+  → public ingress（署名・owner・重複検証、即時ack）
+  → managed task queue
+  → private generation worker
+  → LLM / Slack Web API
+  → accepted suggestion store
 ```
 
-Tags:
+Google CloudではCloud Run、Cloud Tasks、Firestore、Secret Managerが候補である。API Gateway、Cloud SQL、cache、Cloud Storage、Pub/Subを最初から必須にはしない。正式なservice分割、region、IAM、data retention、cost guardは別ADRで決定する。
 
-```text
-source::saydeck
-primary_situation::<primary canonical key>
-secondary_situation::<primary canonical key>::<secondary canonical key>
-layer::<profile code>
-expression_pattern::<a-c>  (patternのみ)
-```
+## 7. Phase 0 verification
 
-詳細は`docs/specifications/anki-export.md`を正本とする。
+1. `git diff --check`
+2. `git ls-files`で旧runtime pathがないことを確認
+3. `git grep`でNext.js、NextAuth、Neon、Vercel Blob、APKG、旧routeのactive referenceを確認
+4. `.github/workflows`が削除済みruntimeを実行しないことを確認
+5. READMEと現行docsのlinkを確認
+6. `git status`で未追跡のuser fileや別worktreeを変更していないことを確認
 
-## 8. Error and security boundaries
-
-- 認証なし: `401`
-- DB未設定: `503`
-- AI/TTS未設定: `503`
-- AI/TTS quota: `429`
-- invalid AI structure: `502`
-- classification/standard不足: `400`
-- audio未準備: `409`またはexport準備失敗
-- storage未設定: Productionでは`503`
-
-全queryで`owner_login`を検証する。API key、DB URL、storage token、raw provider responseをclientやlogへ返さない。
-
-## 9. Migration and compatibility
-
-`0008-situation-first-expression-contract.sql`はSayDeck expression domainをtruncateし、旧分類列、L1〜L4、旧カード本文列、2音声構造を置き換える。`0010-detail-expression-patterns.sql`でpattern_codeを追加し、`0011-three-layer-expression-model.sql`で現行のstandard/native/patternへ移行する。0011は互換性のある旧variantを移し、意味が変わる旧variantを削除せずarchivedにする。`0012-remove-legacy-learning-tables.sql`は廃止済みのアプリ内学習4テーブルと旧generation profile行を物理削除する。新アプリとmigrationは同じrelease単位で切り替える。
-
-旧practice系tableとmigrationは保持するが、現行UI・API・exportから参照しない。旧Anki note typeとの互換投影は行わない。
-
-## 10. Verification
-
-- static: lint、typecheck、production build、WASM trace
-- DB: migration適用、schema probe、transaction採番、suffix、owner isolation
-- browser: INPUT → REVIEW → LISTS → EXPORTの画面とAPI境界
-- audio: 実生成したfixtureを人間が米国英語として試聴
-- Anki: 空profileへのimport、deck、5 fields、Context、front-only audio、再import
+runtimeが存在しないため、Phase 0のrelease gateにlint、typecheck、production build、localhost E2Eを含めない。

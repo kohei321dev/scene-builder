@@ -12,7 +12,11 @@
 
 ADR本体は `docs/adr/` に集約する。機能別メモ、Issue、PRからADR番号へリンクする。
 
-## 現行プロダクト判断
+## 移行中のプロダクト判断
+
+- `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`（Proposed）: Web UIを廃止し、外部resourceを変更せずrepository内の旧Web runtimeを先に全面撤去する。Acceptedになった時点でADR 0013〜0016の現行product・runtime判断を置き換える。
+
+ADR 0017がAcceptedになるまでは、次のADRがrepositoryに存在する旧runtimeの判断履歴である。新規機能の設計根拠としては使用せず、Slack-firstの詳細は後続ADRで決める。
 
 - `docs/adr/0016-situation-first-expression-and-anki-contract.md`: 主・副シチュエーション、semantic表現レイヤー、SayDeck 5フィールド、1音声、破壊的migration
 - `docs/adr/0013-expression-production-and-apkg-only.md`: INPUT / LISTS / EXPORT、アプリ内学習の廃止、APKG-only export

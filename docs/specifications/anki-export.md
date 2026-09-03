@@ -1,8 +1,10 @@
 # Anki Export Specification
 
-- Status: Accepted
+- Status: Legacy / Retirement pending
 - Date: 2026-07-27
 - Scope: SayDeckが生成する米国英語音声同梱`.apkg`
+
+> この文書は旧Web runtimeの外部仕様である。ADR 0017とIssue #116により実装をrepositoryから撤去する。将来Anki integrationを再導入するか、その形式をAPKGにするかは未決定であり、本仕様を次期runtimeの契約として使用しない。
 
 正式なexport形式はAPKGだけとする。TSV、CSV、個別WAV downloadは提供しない。
 
