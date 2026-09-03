@@ -1,9 +1,9 @@
 # ADR 0017: Retire the legacy Web runtime before the Slack-first rebuild
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-04
 - Related Issue: [#116](https://github.com/kohei321dev/saydeck/issues/116)
-- Will supersede when accepted: ADR 0013、0014、0015、0016の現行product・runtime判断
+- Supersedes: ADR 0013、0014、0015、0016の現行product・runtime判断
 
 ## Context
 

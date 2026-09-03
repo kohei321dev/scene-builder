@@ -1,6 +1,6 @@
 # Product Brief: SayDeck
 
-- Status: Accepted direction / Rebuild pending
+- Status: Accepted direction / Legacy runtime retired
 - Updated: 2026-09-04
 - Decision: `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
 
@@ -12,7 +12,7 @@ SayDeckの本体は汎用的な英語生成AIではない。利用場面、生�
 
 ## Problem
 
-独立したWeb UIでは、英語を必要とした瞬間とSayDeckを開く瞬間が分離する。添削、文脈保持、教材管理、音声生成そのものは既存AIサービスやAnkiで代替できるため、INPUT / LISTS / EXPORTを備えた別のWebサービスを維持する価値が小さい。
+独立したWeb UIでは、英語を必要とした瞬間とSayDeckを開く瞬間が分離する。添削、文脈保持、教材管理、音声生成そのものは既存AIサービスや教材で代替できるため、別のWebサービスを維持する価値が小さい。
 
 一方、実際の会話があるSlackから明示的な意図を渡し、同じthreadで候補を受け取り、その場の判断を記録する流れは、利用者が別画面へ移らずに完結する。
 
@@ -37,13 +37,13 @@ ownerはreactionまたはthread返信で候補を扱う。
 
 ### Reuse
 
-採用した表現はsourceに依存しないdomain dataとして保持し、将来Slack以外のadapter、Discord、CLI/API、Ankiなどから利用できる余地を残す。具体的な公開APIとAnki連携方式は未決定とする。
+採用した表現はsourceに依存しないdomain dataとして保持し、将来Slack以外のadapter、Discord、CLI/API、Ankiなどから利用できる余地を残す。具体的な公開APIと教材連携方式は未決定とする。
 
 ## Current transition
 
-最初の変更は[Issue #116](https://github.com/kohei321dev/saydeck/issues/116)である。現行Web UI、API、GitHub OAuth、Neon、APKG、Vercel runtimeをrepositoryから撤去し、新runtimeが実装されるまでサービス不在の期間を許容する。
+Issue [#116](https://github.com/kohei321dev/saydeck/issues/116)で旧Web runtimeをrepositoryから撤去した。現在は実行可能なruntimeを持たず、Slack-first実装の設計開始を待つ状態である。
 
-Vercel Project、Neon Project、Blob、GitHub OAuth App、Slack Appなどの外部resourceはこのcleanupでは変更しない。
+旧実装はGit履歴から参照できる。Vercel、Neon、Blob、GitHub OAuth App、Slack Appなどの外部resourceはcleanupで変更していない。
 
 ## Success measures
 
@@ -60,13 +60,12 @@ Vercel Project、Neon Project、Blob、GitHub OAuth App、Slack Appなどの外�
 - Web UI、Web設定画面、アプリ内学習、採点、復習queueを持たない。
 - SayDeckがSlack channelの周辺会話を自動収集することはしない。
 - Discord、公開API、Codex・Claude Code連携はSlack core flowの後に検討する。
-- 音声、説明、provider切替、Anki exportはcleanup Issue #116に含めない。
+- 音声、説明、provider切替、Anki連携は後続Issueで必要性から判断する。
 - 外部cloud resourceの削除はrepository cleanupと分離する。
 
 ## Source of truth
 
 - 移行要求: `docs/requirements.md`
 - 移行設計: `docs/design.md`
-- 判断: `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
-- 旧APKG仕様: `docs/specifications/anki-export.md`（legacy）
-- 旧Vercel運用: `docs/vercel-deployment.md`（legacy）
+- 現行判断: `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
+- 過去判断: `docs/adr/**`

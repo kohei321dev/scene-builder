@@ -1,8 +1,9 @@
 # ADR 0013: Expression production and APKG-only product scope
 
-- Status: Accepted
+- Status: Superseded
 - Date: 2026-07-20
 - Supersedes: ADR 0009の現行UX、ADR 0010の学習統合・手動音声登録部分、ADR 0012全体
+- Superseded by: ADR 0017
 
 ## Context
 

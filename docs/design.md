@@ -1,62 +1,53 @@
 # SayDeck 移行設計
 
-- Status: Proposed
+- Status: Accepted / Phase 0 completed
 - Date: 2026-09-04
 - Requirements: `docs/requirements.md`
 - Decision: `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
 - Implementation Issue: [#116](https://github.com/kohei321dev/saydeck/issues/116)
 
-## 1. Transition architecture
+## 1. Current architecture
 
 ```text
-現在
-  Next.js Web UI / API
-  + GitHub OAuth
-  + Neon/Postgres
-  + xAI / TTS
-  + Vercel Blob / APKG
+SayDeck repository
+  ├─ README
+  ├─ current product / requirements / design
+  ├─ historical ADRs
+  └─ generic repository operation files
 
-Phase 0
-  repositoryから旧runtimeを全面撤去
-  → docsと開発運用fileだけの再構築状態
-  → 実行可能なSayDeck runtimeなし
-
-将来
-  Slack-first integration runtime
-  → 別ADR・別Issueで設計、実装
+Executable application runtime: none
 ```
 
-Phase 0は移植ではなく撤去である。旧moduleを将来用として残したり、Web routeを非表示にするだけの互換layerを作ったりしない。
+Phase 0は移植ではなく撤去である。旧moduleを将来用として残したり、Web routeを非表示にするだけの互換layerを作ったりしていない。
 
-## 2. Deletion map
+## 2. Removed repository areas
 
-| Area | Phase 0 action | Reason |
-| --- | --- | --- |
-| `src/app/**` | 削除 | 全Web画面、Route Handler、NextAuth endpointが旧product境界 |
-| `src/components/**` | 削除 | INPUT / LISTS / EXPORT専用UI |
-| `src/lib/**` | 削除 | 旧Web、Neon、APKG契約へ結合したserver module |
-| `src/types/**` | 削除 | NextAuth専用型 |
-| `db/**` | 削除 | 外部Neon dataは残すが、旧schemaのrepository migrationは利用しない |
-| `scripts/**` | 削除 | APKG/WASM build専用 |
-| Node / Next / Vercel config | 削除 | cleanup後にNode runtimeを提供しない |
-| `.env.example` | 削除 | 旧runtimeのsecret・接続設定だけを案内している |
-| Neon repository skills | 削除 | 次期Google Cloud設計で使用しない旧database専用resource |
-| CI / PR template | 整理 | 存在しないnpm、UI、OAuth検証を要求させない |
-| 旧active docs | 削除またはlegacy化 | 次期仕様の正本と誤認させない |
+| Area | Phase 0 result |
+| --- | --- |
+| `src/**` | 全Web画面、API、認証、AI、TTS、database、export実装を削除 |
+| `db/**` | 旧schema migrationを削除 |
+| `scripts/**` | 旧Anki/WASM専用scriptを削除 |
+| Node / Next / Vercel config | package、lockfile、compiler、lint、deployment設定を削除 |
+| `.env.example` | 旧runtime専用の設定例を削除 |
+| Neon repository skills | 旧database専用skillとlock情報を削除 |
+| GitHub Actions | 存在しないnpm runtimeを実行するCIを削除 |
+| Legacy active docs | 旧UI、Anki export、Vercel deployment、observability文書を削除 |
 
-## 3. Retained map
+旧runtimeの復元経路はGit履歴だけとする。空package、dummy build、tombstone applicationは作らない。
+
+## 3. Retained repository areas
 
 | Area | Retention rule |
 | --- | --- |
 | `.git` history | 旧runtimeの復元・参照経路として保持 |
 | `LICENSE` | repositoryのlicenseとして保持 |
-| `docs/adr/**` | 過去判断を時系列で追跡するため保持 |
-| Product Brief / requirements / design | Slack-firstの方向と移行状態を示す文書として保持 |
+| `docs/adr/**` | 過去判断を時系列で追跡するため全件保持 |
+| Product Brief / requirements / design | Slack-firstの方向と現在の移行状態を示す正本 |
 | generic GitHub settings | 次期implementationにも有効なものだけ保持 |
 
 ## 4. External boundary
 
-Phase 0のcommitやcommandは外部resourceを直接削除・変更しない。
+Phase 0のcommitやcommandは外部resourceを直接削除・変更していない。
 
 ```text
 Repository cleanup                         External state
@@ -68,18 +59,18 @@ delete NextAuth code                   != delete GitHub OAuth App
 delete Slack draft code                != delete installed Slack App
 ```
 
-Vercelの既存Git連携がmain更新を検知する可能性はあるが、外部設定変更や既存deployment削除は行わない。Production Web UIを実際に停止・削除する作業は別Issueで扱う。
+Git連携など既存の外部automationがmain更新を検知する可能性はあるが、外部設定変更や既存resource削除は別作業とする。
 
-## 5. Historical documentation
+## 5. Decision history
 
-- ADR 0013〜0016はADR 0017がAcceptedになった時点で現行判断ではなくなるが、file自体は削除しない。
-- `docs/specifications/anki-export.md`と`docs/vercel-deployment.md`はlegacy文書として扱う。
-- `docs/uiux/**`と`docs/observability/**`はPhase 0 implementationでactive referenceを確認し、次期設計に不要なら削除する。
-- 過去文書から有用な安全設計を再利用するときは、次期ADRへ判断として書き直す。旧文書を暗黙の現行契約にしない。
+- ADR 0017はPhase 0実装によりAcceptedとする。
+- ADR 0013〜0016はADR 0017により現行product・runtime判断としてはSupersededとなる。
+- ADR fileは削除せず、当時の背景・判断・trade-offを確認できる状態で保持する。
+- 旧UI、export、deployment、observabilityの詳細文書はactive specificationと誤認されないようrepositoryから削除した。必要な情報はGit履歴から参照する。
 
 ## 6. Candidate next architecture
 
-次は方向性を示す候補であり、Issue #116では実装しない。
+次は方向性を示す候補であり、未実装・未確定である。
 
 ```text
 Slack Events API
@@ -92,13 +83,15 @@ Slack Events API
 
 Google CloudではCloud Run、Cloud Tasks、Firestore、Secret Managerが候補である。API Gateway、Cloud SQL、cache、Cloud Storage、Pub/Subを最初から必須にはしない。正式なservice分割、region、IAM、data retention、cost guardは別ADRで決定する。
 
-## 7. Phase 0 verification
+## 7. Verification boundary
+
+Phase 0は次を静的に確認する。
 
 1. `git diff --check`
-2. `git ls-files`で旧runtime pathがないことを確認
-3. `git grep`でNext.js、NextAuth、Neon、Vercel Blob、APKG、旧routeのactive referenceを確認
-4. `.github/workflows`が削除済みruntimeを実行しないことを確認
-5. READMEと現行docsのlinkを確認
-6. `git status`で未追跡のuser fileや別worktreeを変更していないことを確認
+2. tracked file一覧に旧runtime pathがないこと
+3. runtime dependency、migration、旧workflowがないこと
+4. READMEと現行docsに利用可能な旧Web serviceへの案内・linkがないこと
+5. ADRが全件保持されていること
+6. external resource操作とsecret読み取りを行っていないこと
 
-runtimeが存在しないため、Phase 0のrelease gateにlint、typecheck、production build、localhost E2Eを含めない。
+runtimeが存在しないため、lint、typecheck、production build、localhost E2Eは実行しない。これらを成功させるためだけのpackageやscriptも置かない。

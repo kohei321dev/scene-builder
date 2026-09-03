@@ -1,8 +1,9 @@
 # ADR 0015: Situation tag taxonomy and Anki deck hierarchy
 
-- Status: Accepted
+- Status: Superseded
 - Date: 2026-07-21
 - Supersedes: ADR 0013のDecision 3にあるAnki deckの扱い
+- Superseded by: ADR 0017
 
 ## Context
 
