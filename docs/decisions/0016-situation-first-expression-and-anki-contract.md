@@ -77,6 +77,6 @@
 
 - `docs/uiux/proposed-situation-first-data-flow.html`
 - `docs/requirements.md`
-- `docs/design.md`
+- `docs/architecture.md`
 - `docs/specifications/anki-export.md`
 - `db/migrations/0008-situation-first-expression-contract.sql`

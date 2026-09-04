@@ -81,8 +81,8 @@ SayDeckの既存作成モードは、学習シーンを追加する補助機能�
 ## References
 
 - `docs/requirements.md`
-- `docs/design.md`
+- `docs/architecture.md`
 - `docs/specifications/anki-export.md`
-- `docs/adr/0008-neon-postgres-practice-records.md`
-- `docs/adr/0009-scene-builder-ux-architecture.md`
-- `docs/adr/0011-rename-to-saydeck.md`
+- `docs/decisions/0008-neon-postgres-practice-records.md`
+- `docs/decisions/0009-scene-builder-ux-architecture.md`
+- `docs/decisions/0011-rename-to-saydeck.md`

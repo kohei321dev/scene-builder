@@ -3,7 +3,7 @@
 - Status: Accepted / Phase 0 completed
 - Date: 2026-09-04
 - Requirements: `docs/requirements.md`
-- Decision: `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
+- Decision: `docs/decisions/0017-retire-legacy-web-before-slack-rebuild.md`
 - Implementation Issue: [#116](https://github.com/kohei321dev/saydeck/issues/116)
 
 ## 1. Current architecture
@@ -41,7 +41,7 @@ Phase 0は移植ではなく撤去である。旧moduleを将来用として残�
 | --- | --- |
 | `.git` history | 旧runtimeの復元・参照経路として保持 |
 | `LICENSE` | repositoryのlicenseとして保持 |
-| `docs/adr/**` | 過去判断を時系列で追跡するため全件保持 |
+| `docs/decisions/**` | 過去判断を時系列で追跡するため全件保持 |
 | Product Brief / requirements / design | Slack-firstの方向と現在の移行状態を示す正本 |
 | generic GitHub settings | 次期implementationにも有効なものだけ保持 |
 
@@ -95,3 +95,7 @@ Phase 0は次を静的に確認する。
 6. external resource操作とsecret読み取りを行っていないこと
 
 runtimeが存在しないため、lint、typecheck、production build、localhost E2Eは実行しない。これらを成功させるためだけのpackageやscriptも置かない。
+
+## 8. Incomplete decisions
+
+次期runtimeのcomponent分割、data flow、failure boundary、Google Cloud service、region、IAMは未決定である。不足している根拠は、Slack入出力契約と保存・運用条件がまだ承認されていないことである。Issue #117のDecision Recordと正規文書で設計を承認するまで、本書の候補構成を実装仕様として扱わない。

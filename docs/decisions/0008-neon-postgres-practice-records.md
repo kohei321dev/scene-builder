@@ -5,7 +5,7 @@
 
 ## Context
 
-> Historical terminology: this ADR uses the product name at the time. The current product name is `SayDeck`; see `docs/adr/0011-rename-to-saydeck.md`.
+> Historical terminology: this ADR uses the product name at the time. The current product name is `SayDeck`; see `docs/decisions/0011-rename-to-saydeck.md`.
 
 Scene Builderの現在の学習状態は、ブラウザのlocalStorageに保存している。
 
@@ -46,7 +46,7 @@ localStorageだけでは、別端末、別ブラウザ、localStorage削除後�
 ## Addendum: Expression card metadata and audio assets
 
 - Date: 2026-07-20
-- Related ADR: `docs/adr/0010-expression-capture-and-anki-export.md`
+- Related ADR: `docs/decisions/0010-expression-capture-and-anki-export.md`
 
 新しい表現教材化では、元入力、意味単位、難易度別variant、Anki GUID、音声metadata、export状態をNeon/Postgresへ保存する。
 
@@ -157,9 +157,9 @@ create table practice_records (
 
 ## References
 
-- `docs/ADR.md`
-- `docs/adr/0004-auth-and-user-logs.md`
-- `docs/adr/0006-mvp-auth-prototype.md`
+- `docs/decisions/README.md`
+- `docs/decisions/0004-auth-and-user-logs.md`
+- `docs/decisions/0006-mvp-auth-prototype.md`
 - Neon pricing: https://neon.com/pricing
 - Neon on Vercel: https://vercel.com/marketplace/neon
 - Neon manual Vercel connection: https://neon.com/docs/guides/vercel-manual

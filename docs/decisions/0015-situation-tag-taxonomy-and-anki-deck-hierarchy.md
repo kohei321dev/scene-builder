@@ -44,5 +44,5 @@ INPUTでシチュエーションを自由入力させると、実際に必要な
 ## References
 
 - `docs/requirements.md`
-- `docs/design.md`
+- `docs/architecture.md`
 - `docs/specifications/anki-export.md`

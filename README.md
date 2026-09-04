@@ -22,10 +22,11 @@ SayDeckは汎用的な英語生成AIそのものではなく、実際の利用�
 
 ## Repository contents
 
-- `docs/product-brief.md`: productの目的と境界
+- [`docs/README.md`](docs/README.md): 正規文書全体の入口
+- `docs/product.md`: productの目的と境界
 - `docs/requirements.md`: 移行要求と後続実装の開始条件
-- `docs/design.md`: cleanup後の構成と外部resource境界
-- `docs/adr/**`: 過去を含む意思決定履歴
+- `docs/architecture.md`: cleanup後の構成と外部resource境界
+- `docs/decisions/**`: 過去を含む意思決定履歴
 
 旧実装を確認または復元する場合はGit履歴を使用します。過去ADRは履歴として保持していますが、現行runtimeの仕様ではありません。
 

@@ -2,7 +2,7 @@
 
 - Status: Accepted / Phase 0 completed
 - Date: 2026-09-04
-- Related: `docs/product-brief.md`, `docs/design.md`, `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
+- Related: `docs/product.md`, `docs/architecture.md`, `docs/decisions/0017-retire-legacy-web-before-slack-rebuild.md`
 
 ## 1. 目的
 
@@ -60,6 +60,8 @@ repositoryから設定名やadapterを削除することと、外部resourceを�
 
 ## 6. Security and worktree requirements
 
+詳細な安全境界の正本は [`security.md`](security.md) とする。
+
 - `.env.local`、API key、OAuth secret、DB connection string、Blob token、raw provider payloadを読まない。
 - userが作成した未追跡fileと別worktreeを変更しない。
 - unrelatedなGoogle CloudまたはSlack implementationをcleanupへ混在させない。
@@ -76,3 +78,5 @@ Slack-first runtimeの実装は、少なくとも次を承認済み文書で確�
 5. Google Cloud service、region、IAM、secret管理、費用上限
 6. LLM provider、model、timeout、retry、fallback
 7. 可観測性とraw本文を残さないlog設計
+
+本節は承認済みの開始条件であり、個別のSlack入出力やGoogle Cloud構成を承認するものではない。未決定の契約は [`specifications/README.md`](specifications/README.md) に、運用上の不足は [`operations/README.md`](operations/README.md) に記録する。
