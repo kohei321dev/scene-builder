@@ -12,4 +12,4 @@
 
 ## Incomplete
 
-Slack署名検証、workspace/user allowlist、event再送と重複排除、IAM、secret配布、保存data、retention、削除方法は未決定である。現在runtimeと承認済みのSlack契約がないことが不足根拠である。Issue #117のDecision Recordと後続実装Issueで検証可能な条件を承認するまで、候補を実装仕様として扱わない。
+Slack署名検証、workspace/user allowlist、event再送と重複排除、IAM、secret配布、保存data、retention、削除方法は未決定である。現在runtimeと承認済みのSlack契約がないことが不足根拠である。Issue #120のDecision Recordと後続実装Issueで検証可能な条件を承認するまで、候補を実装仕様として扱わない。

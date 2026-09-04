@@ -98,4 +98,4 @@ runtimeが存在しないため、lint、typecheck、production build、localhos
 
 ## 8. Incomplete decisions
 
-次期runtimeのcomponent分割、data flow、failure boundary、Google Cloud service、region、IAMは未決定である。不足している根拠は、Slack入出力契約と保存・運用条件がまだ承認されていないことである。Issue #117のDecision Recordと正規文書で設計を承認するまで、本書の候補構成を実装仕様として扱わない。
+次期runtimeのcomponent分割、data flow、failure boundary、Google Cloud service、region、IAMは未決定である。不足している根拠は、Slack入出力契約と保存・運用条件がまだ承認されていないことである。Issue #120のDecision Recordと正規文書で設計を承認するまで、本書の候補構成を実装仕様として扱わない。
