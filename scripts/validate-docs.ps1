@@ -28,12 +28,12 @@ $requiredFiles = @(
 foreach ($relativePath in $requiredFiles) {
     $path = Join-Path $repositoryRoot $relativePath
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
-        $errors.Add("必須fileがありません: $relativePath")
+        $errors.Add("Required file is missing: $relativePath")
         continue
     }
 
     if ((Get-Item -LiteralPath $path).Length -eq 0) {
-        $errors.Add("必須fileが空です: $relativePath")
+        $errors.Add("Required file is empty: $relativePath")
     }
 }
 
@@ -52,7 +52,7 @@ foreach ($markdownFile in $markdownFiles) {
 
     foreach ($legacyPath in $legacyPaths) {
         if ($content.Contains($legacyPath)) {
-            $errors.Add("旧path参照が残っています: $relativePath -> $legacyPath")
+            $errors.Add("Legacy path reference remains: $relativePath -> $legacyPath")
         }
     }
 
@@ -70,7 +70,7 @@ foreach ($markdownFile in $markdownFiles) {
         $decodedTarget = [System.Uri]::UnescapeDataString($targetWithoutFragment)
         $resolvedPath = Join-Path $markdownFile.DirectoryName $decodedTarget
         if (-not (Test-Path -LiteralPath $resolvedPath)) {
-            $errors.Add("内部linkの参照先がありません: $relativePath -> $target")
+            $errors.Add("Internal link target is missing: $relativePath -> $target")
         }
     }
 }
@@ -80,7 +80,7 @@ $decisionFiles = Get-ChildItem -LiteralPath (Join-Path $repositoryRoot 'docs/dec
     Sort-Object Name
 
 if ($decisionFiles.Count -ne 17) {
-    $errors.Add("Decision Recordは0001〜0017の17件が必要です: actual=$($decisionFiles.Count)")
+    $errors.Add("Expected 17 Decision Records from 0001 through 0017: actual=$($decisionFiles.Count)")
 }
 
 $seenIds = @{}
@@ -88,26 +88,26 @@ $decisionIndex = Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $reposi
 foreach ($decisionFile in $decisionFiles) {
     $id = [regex]::Match($decisionFile.Name, '^(\d{4})-').Groups[1].Value
     if ($seenIds.ContainsKey($id)) {
-        $errors.Add("Decision Record IDが重複しています: $id")
+        $errors.Add("Duplicate Decision Record ID: $id")
     }
     $seenIds[$id] = $true
 
     $content = Get-Content -Raw -Encoding UTF8 -LiteralPath $decisionFile.FullName
     if ($content -notmatch "(?m)^# ADR(?:-|\s)$id(?:\D|$)") {
-        $errors.Add("Decision Record見出しとfile IDが一致しません: $($decisionFile.Name)")
+        $errors.Add("Decision Record heading does not match file ID: $($decisionFile.Name)")
     }
     if ($content -notmatch '(?m)^- Status:\s*\S+') {
-        $errors.Add("Decision RecordにStatusがありません: $($decisionFile.Name)")
+        $errors.Add("Decision Record has no Status: $($decisionFile.Name)")
     }
     if (-not $decisionIndex.Contains($decisionFile.Name)) {
-        $errors.Add("Decision Record indexにfileがありません: $($decisionFile.Name)")
+        $errors.Add("Decision Record is missing from index: $($decisionFile.Name)")
     }
 }
 
 $expectedIds = 1..17 | ForEach-Object { $_.ToString('0000') }
 foreach ($expectedId in $expectedIds) {
     if (-not $seenIds.ContainsKey($expectedId)) {
-        $errors.Add("Decision Record IDがありません: $expectedId")
+        $errors.Add("Decision Record ID is missing: $expectedId")
     }
 }
 
