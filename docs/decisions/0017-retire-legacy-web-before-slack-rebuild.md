@@ -73,8 +73,8 @@ SayDeckは、独立した英語学習WebサービスとしてINPUT / LISTS / EXP
 ## References
 
 - [Issue #116](https://github.com/kohei321dev/saydeck/issues/116)
-- `docs/product-brief.md`
+- `docs/product.md`
 - `docs/requirements.md`
-- `docs/design.md`
-- `docs/adr/0013-expression-production-and-apkg-only.md`
-- `docs/adr/0016-situation-first-expression-and-anki-contract.md`
+- `docs/architecture.md`
+- `docs/decisions/0013-expression-production-and-apkg-only.md`
+- `docs/decisions/0016-situation-first-expression-and-anki-contract.md`

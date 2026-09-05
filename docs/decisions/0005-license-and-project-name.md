@@ -3,7 +3,7 @@
 - Status: Superseded
 - Date: 2026-05-24
 
-> Superseded for product and repository naming by `docs/adr/0011-rename-to-saydeck.md` on 2026-07-20. The license decision remains historical context and has not changed.
+> Superseded for product and repository naming by `docs/decisions/0011-rename-to-saydeck.md` on 2026-07-20. The license decision remains historical context and has not changed.
 
 ## Context
 

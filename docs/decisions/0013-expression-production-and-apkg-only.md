@@ -75,9 +75,9 @@
 
 ## References
 
-- `docs/product-brief.md`
+- `docs/product.md`
 - `docs/requirements.md`
-- `docs/design.md`
+- `docs/architecture.md`
 - `docs/specifications/anki-export.md`
-- `docs/adr/0010-expression-capture-and-anki-export.md`
-- `docs/adr/0012-dev-learning-projection-and-anki-selection.md`
+- `docs/decisions/0010-expression-capture-and-anki-export.md`
+- `docs/decisions/0012-dev-learning-projection-and-anki-selection.md`

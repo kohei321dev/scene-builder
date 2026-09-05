@@ -2,7 +2,7 @@
 
 - Status: Accepted direction / Legacy runtime retired
 - Updated: 2026-09-04
-- Decision: `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
+- Decision: `docs/decisions/0017-retire-legacy-web-before-slack-rebuild.md`
 
 ## Product statement
 
@@ -66,6 +66,6 @@ Issue [#116](https://github.com/kohei321dev/saydeck/issues/116)で旧Web runtime
 ## Source of truth
 
 - 移行要求: `docs/requirements.md`
-- 移行設計: `docs/design.md`
-- 現行判断: `docs/adr/0017-retire-legacy-web-before-slack-rebuild.md`
-- 過去判断: `docs/adr/**`
+- 移行設計: `docs/architecture.md`
+- 現行判断: `docs/decisions/0017-retire-legacy-web-before-slack-rebuild.md`
+- 過去判断: `docs/decisions/**`

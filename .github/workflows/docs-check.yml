@@ -1,0 +1,27 @@
+name: Docs check
+
+on:
+  pull_request:
+    paths:
+      - "**/*.md"
+      - "scripts/validate-docs.ps1"
+      - ".github/workflows/docs-check.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.md"
+      - "scripts/validate-docs.ps1"
+      - ".github/workflows/docs-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate documentation
+        shell: powershell
+        run: .\scripts\validate-docs.ps1

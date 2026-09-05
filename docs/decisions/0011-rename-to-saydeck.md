@@ -36,8 +36,8 @@
 
 ## References
 
-- `docs/product-brief.md`
+- `docs/product.md`
 - `docs/requirements.md`
-- `docs/design.md`
+- `docs/architecture.md`
 - `docs/specifications/anki-export.md`
-- `docs/adr/0005-license-and-project-name.md`
+- `docs/decisions/0005-license-and-project-name.md`

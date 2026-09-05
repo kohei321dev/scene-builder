@@ -11,7 +11,7 @@ Scene Builderでは、Next.js、NextAuth、GitHub OAuth、Google OAuth、Grok/xA
 
 ## Decision
 
-ADR運用ガイドを `docs/ADR.md` に作成し、個別ADRは `docs/adr/NNNN-short-title.md` に集約する。
+ADR運用ガイドを `docs/decisions/README.md` に作成し、個別ADRは `docs/decisions/NNNN-short-title.md` に集約する。
 
 - 外部サービス、DB、認証、AI API、コスト、運用、secret、privacyに関わる判断はADRを書く
 - 実装IssueやPRはADR番号へリンクする
@@ -20,9 +20,9 @@ ADR運用ガイドを `docs/ADR.md` に作成し、個別ADRは `docs/adr/NNNN-s
 
 ## Options Considered
 
-### Option A: ADRを `docs/adr/` に集約する
+### Option A: ADRを `docs/decisions/` に集約する
 
-- [事実] 既存ADRがすでに `docs/adr/` にある
+- [事実] 既存ADRがすでに `docs/decisions/` にある
 - [判断] 小規模リポジトリでは、ADRを集約した方が検索、番号管理、Issueリンクが簡単
 - [懸念] 機能別docsから遠くなるため、リンクで補う必要がある
 
@@ -45,6 +45,6 @@ ADR運用ガイドを `docs/ADR.md` に作成し、個別ADRは `docs/adr/NNNN-s
 
 ## References
 
-- `docs/ADR.md`
+- `docs/decisions/README.md`
 - 『ソフトウェアアーキテクチャの基礎 第2版』
 - 『システム思考の世界へ』

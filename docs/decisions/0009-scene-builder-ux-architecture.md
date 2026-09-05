@@ -3,9 +3,9 @@
 - Status: Superseded
 - Date: 2026-06-02
 
-> Superseded by `docs/adr/0013-expression-production-and-apkg-only.md` on 2026-07-20. The Practice-first learning flow is historical context and is not part of the current product scope.
+> Superseded by `docs/decisions/0013-expression-production-and-apkg-only.md` on 2026-07-20. The Practice-first learning flow is historical context and is not part of the current product scope.
 
-> Historical terminology: this ADR uses the product name at the time. The current product name is `SayDeck`; see `docs/adr/0011-rename-to-saydeck.md`.
+> Historical terminology: this ADR uses the product name at the time. The current product name is `SayDeck`; see `docs/decisions/0011-rename-to-saydeck.md`.
 
 ## Context
 
@@ -220,9 +220,9 @@ PR PreviewはUI確認の必須導線にしない。Issue #34 の方針に従い�
 
 ## References
 
-- `docs/ADR.md`
-- `docs/product-brief.md`
-- `docs/adr/0008-neon-postgres-practice-records.md`
+- `docs/decisions/README.md`
+- `docs/product.md`
+- `docs/decisions/0008-neon-postgres-practice-records.md`
 - `docs/uiux/scene-builder-ux-brainstorming.md`
 - `docs/uiux/scene-builder-learning-flow.md`
 - `src/components/scene-practice.tsx`

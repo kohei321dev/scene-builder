@@ -126,8 +126,8 @@ visibility, and a potential future migration.
 
 - `src/lib/binary-store.ts`
 - `docs/specifications/anki-export.md`
-- `docs/adr/0010-expression-capture-and-anki-export.md`
-- `docs/adr/0013-expression-production-and-apkg-only.md`
+- `docs/decisions/0010-expression-capture-and-anki-export.md`
+- `docs/decisions/0013-expression-production-and-apkg-only.md`
 - [Vercel Blob pricing](https://vercel.com/docs/vercel-blob/usage-and-pricing) (checked 2026-07-21)
 - [Amazon S3 pricing](https://aws.amazon.com/s3/pricing/) (checked 2026-07-21)
 - [Google Cloud Storage pricing](https://cloud.google.com/storage/pricing) (checked 2026-07-21)
