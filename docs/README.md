@@ -1,6 +1,6 @@
 # SayDeck documentation
 
-SayDeckの正規文書と意思決定履歴への入口である。現在はrepositoryに実行可能なruntimeがなく、Slack-first再構築の仕様と設計は未承認である。
+SayDeckの正規文書と意思決定履歴への入口である。現在はrepositoryに実行可能なruntimeがなく、owner専用の個人用APIと最初のSlack adapterを定義するADR 0018はProposedである。
 
 ## 正規文書
 
@@ -18,7 +18,7 @@ SayDeckの正規文書と意思決定履歴への入口である。現在はrepo
 
 ## 現行と履歴の区別
 
-Product、Requirements、ArchitectureとAcceptedなDecision Record 0017が現在の正本である。ProposedまたはSupersededなDecision RecordとGit履歴の旧runtimeは参考記録であり、現行仕様ではない。
+Product、Requirements、ArchitectureとAcceptedなDecision Record 0017が現在の正本である。[Decision Record 0018](decisions/0018-private-api-with-slack-adapter.md)、[Personal API specification](specifications/personal-api.md)、[Slack adapter specification](specifications/slack.md)はIssue #120のProposedな次期contractであり、owner review後にStatusをAcceptedへ更新して本Pull Requestをmergeするまでruntime実装の根拠にしない。SupersededなDecision RecordとGit履歴の旧runtimeは参考記録であり、現行仕様ではない。
 
 ## 検証
 

@@ -1,7 +1,7 @@
 # Security
 
-- Status: Accepted boundary / Incomplete for the next runtime
-- Updated: 2026-09-04
+- Status: Accepted baseline / Proposed next runtime boundary
+- Updated: 2026-09-05
 
 ## 確認済みの境界
 
@@ -12,6 +12,22 @@
 - 次期Slack runtimeはowner本人と許可済みworkspaceだけを対象とし、ownerが明示した入力以外の周辺会話を無断取得しない。
 - raw Slack本文とprovider responseをapplication logへ出力しない。
 
-## Incomplete
+## Proposed API and Slack boundary
 
-Slack署名検証、workspace/user allowlist、event再送と重複排除、IAM、secret配布、保存data、retention、削除方法は未決定である。現在runtimeと承認済みのSlack契約がないことが不足根拠である。Issue #120のDecision Recordと後続実装Issueで検証可能な条件を承認するまで、候補を実装仕様として扱わない。
+Issue [#120](https://github.com/kohei321dev/saydeck/issues/120)と[Decision Record 0018](decisions/0018-private-api-with-slack-adapter.md)で、次を提案する。
+
+- `/v1/**`はowner bearer token、`/slack/**`はSlack signatureと5分以内のtimestampで認証する。
+- 許可済みworkspaceとowner `user_id`の両方が一致した入力だけを処理する。
+- slash command、app mention、保存済みcandidateへの指定reactionだけを処理し、一般message eventやchannel historyを要求しない。
+- public API serviceとprivate workerへ別service accountを割り当て、Cloud Tasks専用identityだけにworker invokeを許可する。
+- owner token、Slack Signing Secret、Slack Bot Token、xAI API keyを別のSecret Manager secretとして保持し、serviceごとに必要なsecret versionだけを参照する。
+- user-managed service account keyを作らない。
+- raw Slack body、Authorization header、`response_url`、secret、raw provider responseを保存またはloggingしない。
+- 未採用dataとoperationは30日TTL、採用dataはowner deleteまで保持する。
+- xAI requestは`store: false`、tool・searchなしとする。ただしproviderの標準retentionが最大30日である残存riskはowner向けMVPで受け入れる。
+
+## Remaining verification
+
+- Status: Incomplete
+- Missing evidence: runtime、cloud resource、service account、secret、Slack App設定が未実装であり、実効権限、署名検証、owner拒否、TTL、log除外、provider retentionを実環境で検証していない。
+- Required decision: Decision Record 0018をreview・Acceptedにし、後続Issueごとにsecurity testと権限差分を承認する。
