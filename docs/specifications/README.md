@@ -1,7 +1,12 @@
 # Specifications
 
-- Status: Incomplete
-- Reason: repositoryに実行可能なruntimeがなく、Slack event・command・reaction・replyの外部契約が承認されていない。
-- Required decision: 入力schema、同期ack、非同期生成、thread返信、採用・再生成・修正の契約をDecision Recordと正規仕様で承認する。
+- Status: Proposed
+- Reason: repositoryに実行可能なruntimeはない。Issue #120で個人用APIと最初のSlack adapterの外部contractを提案する。
+- Required decision: Decision Record 0018と次の仕様をreviewし、Acceptedにする。
 
-Productの目標は [`../product.md`](../product.md)、実装開始条件は [`../requirements.md`](../requirements.md) を参照する。この文書は候補のSlack flowを承認済み仕様へ昇格させない。
+## Proposed contracts
+
+- [Personal API](personal-api.md): owner認証、idempotency、生成、採否、削除、error、limit
+- [Slack adapter](slack.md): request署名、allowlist、slash command、app mention、reaction、修正、ack、返信
+
+Productの目標は [`../product.md`](../product.md)、実装開始条件は [`../requirements.md`](../requirements.md)、責務分離は [`../architecture.md`](../architecture.md) を参照する。仕様とDecision RecordがAcceptedになるまで、runtimeが利用可能であるとは案内しない。

@@ -1,10 +1,10 @@
 # SayDeck 移行設計
 
-- Status: Accepted / Phase 0 completed
-- Date: 2026-09-04
+- Status: Accepted Phase 0 / Proposed next runtime
+- Date: 2026-09-05
 - Requirements: `docs/requirements.md`
-- Decision: `docs/decisions/0017-retire-legacy-web-before-slack-rebuild.md`
-- Implementation Issue: [#116](https://github.com/kohei321dev/saydeck/issues/116)
+- Decisions: `docs/decisions/0017-retire-legacy-web-before-slack-rebuild.md`、`docs/decisions/0018-private-api-with-slack-adapter.md`
+- Related Issues: [#116](https://github.com/kohei321dev/saydeck/issues/116)、[#120](https://github.com/kohei321dev/saydeck/issues/120)
 
 ## 1. Current architecture
 
@@ -42,7 +42,7 @@ Phase 0は移植ではなく撤去である。旧moduleを将来用として残�
 | `.git` history | 旧runtimeの復元・参照経路として保持 |
 | `LICENSE` | repositoryのlicenseとして保持 |
 | `docs/decisions/**` | 過去判断を時系列で追跡するため全件保持 |
-| Product Brief / requirements / design | Slack-firstの方向と現在の移行状態を示す正本 |
+| Product / requirements / architecture | API-firstの方向、Slack adapter、現在の移行状態を示す正本 |
 | generic GitHub settings | 次期implementationにも有効なものだけ保持 |
 
 ## 4. External boundary
@@ -61,6 +61,8 @@ delete Slack draft code                != delete installed Slack App
 
 Git連携など既存の外部automationがmain更新を検知する可能性はあるが、外部設定変更や既存resource削除は別作業とする。
 
+この図はIssue #116実施時点の責務境界を示す。その後、Issue #122でVercelのGit連携を解除し、2026-09-05にownerからIssue #125のVercel ProjectとIssue #126のNeon Projectを削除済みとの報告を受けた。repository作業では外部Project消失、backup、billingを独立検証しておらず、Vercel Blob、GitHub OAuth App、Slack Appは報告対象外である。
+
 ## 5. Decision history
 
 - ADR 0017はPhase 0実装によりAcceptedとする。
@@ -68,20 +70,44 @@ Git連携など既存の外部automationがmain更新を検知する可能性は
 - ADR fileは削除せず、当時の背景・判断・trade-offを確認できる状態で保持する。
 - 旧UI、export、deployment、observabilityの詳細文書はactive specificationと誤認されないようrepositoryから削除した。必要な情報はGit履歴から参照する。
 
-## 6. Candidate next architecture
+## 6. Proposed next architecture
 
-次は方向性を示す候補であり、未実装・未確定である。
+次はDecision Record 0018で提案する構成であり、未実装である。Decision RecordがAcceptedになるまでcloud resourceやruntimeを作らない。
 
 ```text
-Slack Events API
-  → public ingress（署名・owner・重複検証、即時ack）
-  → managed task queue
-  → private generation worker
-  → LLM / Slack Web API
-  → accepted suggestion store
+owner client / Slack
+  → saydeck-api: Cloud Run public ingress
+       ├─ /v1/**: owner bearer token
+       ├─ /slack/**: Slack signature + workspace/user allowlist
+       ├─ Firestore: operationとidempotency
+       └─ Cloud Tasks: 有限retry
+            → saydeck-worker: Cloud Run private ingress
+                 ├─ xAI Responses API
+                 ├─ Firestore: suggestionとgeneration metadata
+                 └─ Slack Web API: sourceがSlackの場合の返信
 ```
 
-Google CloudではCloud Run、Cloud Tasks、Firestore、Secret Managerが候補である。API Gateway、Cloud SQL、cache、Cloud Storage、Pub/Subを最初から必須にはしない。正式なservice分割、region、IAM、data retention、cost guardは別ADRで決定する。
+全serviceとdataは`asia-northeast1`へ集約する。API serviceだけをpublic ingressとし、workerはCloud Tasks専用service accountからのOIDC requestだけを許可する。secretはSecret Managerでservice単位に分離する。
+
+API Gateway、Cloud SQL、cache、Cloud Storage、Pub/Sub、multi-regionを最初から必須にしない。API contractは [`specifications/personal-api.md`](specifications/personal-api.md)、Slack固有contractは [`specifications/slack.md`](specifications/slack.md) を正本とする。
+
+### Data flow
+
+1. API serviceがroute固有の認証、owner、入力、idempotencyを検証する。
+2. Firestore transactionでoperationを作り、Cloud Taskを一意なoperation IDでenqueueする。
+3. APIまたはSlackへ`queued`を返す。Slack requestは3秒以内にackする。
+4. private workerがtaskを取得し、xAIへ1候補のstructured outputを要求する。
+5. workerが正規化済み候補とmetadataをFirestoreへ保存する。
+6. sourceがSlackなら、candidate IDを紐づけて元threadまたはchannelへ投稿する。
+7. accept、regenerate、correctも新しいidempotent commandとして同じflowを通る。
+
+### Failure boundaries
+
+- API serviceがqueue登録前に失敗したrequestは処理済みと扱わない。
+- Cloud Tasksとworkerはat-least-onceであり、Firestoreのoperation stateで重複生成と重複保存を抑止する。
+- retry対象はproviderまたはSlackの`429`、timeout、`5xx`だけとする。
+- providerの認証・schema・入力errorは終端failureとして保存し、安全なerror codeだけを返す。
+- Slack投稿成功直後のprocess停止には重複返信windowが残る。exactly-once deliveryは保証しない。
 
 ## 7. Verification boundary
 
@@ -96,6 +122,15 @@ Phase 0は次を静的に確認する。
 
 runtimeが存在しないため、lint、typecheck、production build、localhost E2Eは実行しない。これらを成功させるためだけのpackageやscriptも置かない。
 
-## 8. Incomplete decisions
+## 8. Implementation state and remaining risks
 
-次期runtimeのcomponent分割、data flow、failure boundary、Google Cloud service、region、IAMは未決定である。不足している根拠は、Slack入出力契約と保存・運用条件がまだ承認されていないことである。Issue #120のDecision Recordと正規文書で設計を承認するまで、本書の候補構成を実装仕様として扱わない。
+component、data flow、failure boundary、Google Cloud service、region、IAMはDecision Record 0018としてProposedである。repositoryには引き続きruntime、Infrastructure as Code、cloud resource、secretが存在しない。
+
+次は後続Issueで実装・検証する必要がある。
+
+- Slackの3秒ackをmin instances 0で満たせるか
+- Firestore transactionとtask作成のfailure recovery
+- provider call後の重複Slack delivery window
+- service accountごとの実効権限
+- xAI retentionとZDR availability
+- JPY 1,000のbudget alert、max instances、daily quotaが費用guardとして機能するか

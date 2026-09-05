@@ -1,12 +1,12 @@
 # SayDeck 移行要求
 
-- Status: Accepted / Phase 0 completed
-- Date: 2026-09-04
-- Related: `docs/product.md`, `docs/architecture.md`, `docs/decisions/0017-retire-legacy-web-before-slack-rebuild.md`
+- Status: Accepted Phase 0 / Proposed next runtime contract
+- Date: 2026-09-05
+- Related: `docs/product.md`, `docs/architecture.md`, `docs/decisions/0017-retire-legacy-web-before-slack-rebuild.md`、`docs/decisions/0018-private-api-with-slack-adapter.md`
 
 ## 1. 目的
 
-SayDeckを独立した英語学習Webサービスから、Slackなど実際に使う場所で英語表現を得て採否を記録するintegrationサービスへ再構築する。
+SayDeckを独立した英語学習Webサービスから、owner専用の個人用APIを本体とし、Slackなど実際に使うUIから英語表現を得て採否を記録するintegrationサービスへ再構築する。
 
 Phase 0では、利用していない旧Web runtimeをrepositoryから全面撤去し、次期runtimeを旧data model・認証・deploymentへ依存せず設計できる状態にした。
 
@@ -25,17 +25,20 @@ Issue [#116](https://github.com/kohei321dev/saydeck/issues/116)により、次�
 
 過去ADRは削除せず、意思決定履歴として保持する。新しいSlack runtimeが実装されるまで、実行可能なSayDeckサービスが存在しない状態を許容する。
 
-## 3. Slack-first rebuild candidates
+## 3. Proposed API-first runtime contract
 
-次の要求候補は別ADR・別Issueで確定する。Phase 0の実装には含めない。
+Issue [#120](https://github.com/kohei321dev/saydeck/issues/120)では、次をDecision Record 0018と外部仕様として提案する。Decision RecordがAcceptedになるまでruntime実装を開始しない。
 
-- Slackの明示入力を受ける
-- Slackへ短時間でackし、LLM処理を非同期化する
-- 同じthreadへ英語1文を返す
+- owner bearer tokenで保護した個人用APIをcore contractとする
+- Slackを最初のUI adapterとし、署名済みのslash commandとapp mentionだけを受ける
+- Slackへ3秒以内にackし、LLM処理をCloud Tasksで非同期化する
+- 元のSlack threadまたはchannelへ英語1文を返す
 - 1 Bot messageを1候補としてreaction対象を一意にする
-- 採用・再生成・修正を処理して保存する
-- provider、model、prompt versionと処理状態を追跡する
-- transportに依存しないdomain境界を作り、将来adapterを追加できるようにする
+- 採用・再生成・明示的な修正をidempotentに処理して保存する
+- xAIのprovider、requested/actual model、prompt version、token、cost、処理状態を追跡する
+- transportに依存しないdomain境界を作り、将来Discordやapplication adapterを追加できるようにする
+- 未採用dataは30日後に削除し、採用dataはownerの明示削除まで保持する
+- raw Slack body、周辺会話、secret、raw provider responseを保存・loggingしない
 
 ## 4. Repository requirements
 
@@ -45,9 +48,9 @@ Issue [#116](https://github.com/kohei321dev/saydeck/issues/116)により、次�
 - PR templateは特定runtimeへ依存せず、Issue固有の検証と外部変更を明示させる。
 - 旧実装の参照・復元にはGit履歴を使用する。
 
-## 5. External resource isolation
+## 5. External resource isolation and reported state
 
-repository cleanupは次を変更していない。停止・削除・再利用は別Issueで扱う。
+Issue #116のrepository cleanupは次を変更していない。停止・削除・再利用は別Issueで扱う境界とした。
 
 - Vercel Project、deployment、domain、Environment Variables
 - Neon Project、database、data
@@ -57,6 +60,15 @@ repository cleanupは次を変更していない。停止・削除・再利用�
 - Google Cloud resource
 
 repositoryから設定名やadapterを削除することと、外部resourceを削除することを同一視しない。
+
+その後の状態は次のとおりである。
+
+- Issue #122: VercelのGit連携とCodeRabbit accessを解除した。
+- Issue #125: 2026-09-05にownerからVercel Projectを削除済みとの報告を受けた。
+- Issue #126: 2026-09-05にownerからNeon Projectを削除済みとの報告を受けた。
+- Status: Incomplete
+- Missing evidence: repository作業ではVercel・NeonのProject消失、backup、billing、credential失効、Project外resourceを独立検証していない。
+- Required decision: 外部状態の証跡が必要になった場合は、secretやprivate URLを出力しないread-only検証を別Issueで承認する。
 
 ## 6. Security and worktree requirements
 
@@ -69,14 +81,15 @@ repositoryから設定名やadapterを削除することと、外部resourceを�
 
 ## 7. Next implementation gate
 
-Slack-first runtimeの実装は、少なくとも次を承認済み文書で確定してから開始する。
+個人用APIとSlack adapterのruntime実装は、少なくとも次をAcceptedなDecision Recordと正規文書で確定してから開始する。
 
-1. Slack event・command・reactionの入出力契約
-2. 署名検証、workspace/user allowlist、再送と重複排除
-3. 同期ackと非同期workerの責務境界
-4. 保存data、retention、削除方法
-5. Google Cloud service、region、IAM、secret管理、費用上限
-6. LLM provider、model、timeout、retry、fallback
-7. 可観測性とraw本文を残さないlog設計
+1. owner認証、idempotency、個人用APIの入出力契約
+2. Slack event・command・reaction・修正replyの入出力契約
+3. 署名検証、workspace/user allowlist、再送と重複排除
+4. 同期ackと非同期workerの責務境界
+5. 保存data、retention、削除方法
+6. Google Cloud service、region、IAM、secret管理、費用上限
+7. LLM provider、model、timeout、retry、fallback
+8. 可観測性とraw本文を残さないlog設計
 
-本節は承認済みの開始条件であり、個別のSlack入出力やGoogle Cloud構成を承認するものではない。未決定の契約は [`specifications/README.md`](specifications/README.md) に、運用上の不足は [`operations/README.md`](operations/README.md) に記録する。
+具体案は [`specifications/personal-api.md`](specifications/personal-api.md)、[`specifications/slack.md`](specifications/slack.md)、[`architecture.md`](architecture.md)、[`security.md`](security.md)、[`operations/README.md`](operations/README.md)、Decision Record 0018に記録する。本PRのmerge後も、cloud resource、secret、Slack App、runtimeは後続Issueの個別評価と人間承認なしに変更しない。

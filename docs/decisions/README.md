@@ -25,6 +25,7 @@
 | 0015 | Superseded by ADR 0017 | [Situation tag taxonomy and Anki deck hierarchy](0015-situation-tag-taxonomy-and-anki-deck-hierarchy.md) |
 | 0016 | Superseded by ADR 0017 | [Situation-first expression and Anki contract](0016-situation-first-expression-and-anki-contract.md) |
 | 0017 | Accepted | [Retire the legacy Web runtime before the Slack-first rebuild](0017-retire-legacy-web-before-slack-rebuild.md) |
+| 0018 | Proposed | [Private personal API with Slack as the first adapter](0018-private-api-with-slack-adapter.md) |
 
 ## 保管場所
 
@@ -38,6 +39,7 @@ ADR本体は `docs/decisions/` に集約する。機能別メモ、Issue、PRか
 ## 現行のプロダクト判断
 
 - `docs/decisions/0017-retire-legacy-web-before-slack-rebuild.md`（Accepted）: Web UIを廃止し、外部resourceを変更せずrepository内の旧Web runtimeを先に全面撤去した。Slack-firstの詳細は後続ADRで決める。
+- `docs/decisions/0018-private-api-with-slack-adapter.md`（Proposed）: SayDeck本体をowner専用の個人用APIとし、Slackを最初のUI adapterとする。Google Cloud、保存、LLM、費用、運用境界を提案する。Acceptedになるまでruntime実装の根拠にしない。
 
 ADR 0013〜0016はADR 0017により現行product・runtime判断としてSupersededとなった。fileは当時の意思決定履歴として保持するが、新規機能の設計根拠としては使用しない。
 

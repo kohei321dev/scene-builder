@@ -79,8 +79,8 @@ $decisionFiles = Get-ChildItem -LiteralPath (Join-Path $repositoryRoot 'docs/dec
     Where-Object { $_.Name -match '^(\d{4})-.+\.md$' } |
     Sort-Object Name
 
-if ($decisionFiles.Count -ne 17) {
-    $errors.Add("Expected 17 Decision Records from 0001 through 0017: actual=$($decisionFiles.Count)")
+if ($decisionFiles.Count -ne 18) {
+    $errors.Add("Expected 18 Decision Records from 0001 through 0018: actual=$($decisionFiles.Count)")
 }
 
 $seenIds = @{}
@@ -104,7 +104,7 @@ foreach ($decisionFile in $decisionFiles) {
     }
 }
 
-$expectedIds = 1..17 | ForEach-Object { $_.ToString('0000') }
+$expectedIds = 1..18 | ForEach-Object { $_.ToString('0000') }
 foreach ($expectedId in $expectedIds) {
     if (-not $seenIds.ContainsKey($expectedId)) {
         $errors.Add("Decision Record ID is missing: $expectedId")
