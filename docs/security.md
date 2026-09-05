@@ -6,7 +6,9 @@
 ## 確認済みの境界
 
 - `.env.local`、API key、OAuth secret、database connection string、storage token、raw provider payloadをrepository、Issue、Pull Request、application logに残さない。
-- repository cleanupはVercel、Neon、Blob、GitHub OAuth App、Slack App、Google Cloud resourceの設定・data・secretを変更していない。
+- Issue #116のrepository cleanupはVercel、Neon、Blob、GitHub OAuth App、Slack App、Google Cloud resourceの設定・data・secretを変更していない。
+- Issue [#122](https://github.com/kohei321dev/saydeck/issues/122)でCodeRabbitのaccessをこのrepositoryから外し、Vercel ProjectとのGit連携を解除した。他repositoryのCodeRabbit access、およびVercel Project・deployment・domain・Environment Variablesは変更していない。
+- 外部連携の再接続時は、対象repositoryだけに必要最小限の権限を付与し、目的と解除方法を同じIssueで確認する。
 - 次期Slack runtimeはowner本人と許可済みworkspaceだけを対象とし、ownerが明示した入力以外の周辺会話を無断取得しない。
 - raw Slack本文とprovider responseをapplication logへ出力しない。
 
