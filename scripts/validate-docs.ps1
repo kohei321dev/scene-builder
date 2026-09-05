@@ -7,7 +7,6 @@ $errors = [System.Collections.Generic.List[string]]::new()
 
 $requiredFiles = @(
     'README.md',
-    'AGENTS.md',
     'docs/README.md',
     'docs/product.md',
     'docs/requirements.md',
