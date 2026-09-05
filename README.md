@@ -34,7 +34,9 @@ SayDeckは汎用的な英語生成AIそのものではなく、個人用APIを�
 
 Issue [#122](https://github.com/kohei321dev/saydeck/issues/122)で、Vercel Project `saydecks` とこのrepositoryのGit連携、およびCodeRabbitのこのrepositoryへのaccessを解除しました。GitHub Actionsは文書検証用のDocs checkだけを維持しています。
 
-Vercel Project・過去deployment・domain・Environment Variables、Neon Project・data、Vercel Blob、GitHub OAuth App、既存Slack Appは削除または変更していません。VercelのGit連携またはCodeRabbitを再度有効にする場合は、対象runtimeと必要性を別Issueで承認してから設定します。
+2026-09-05にownerから、Issue [#125](https://github.com/kohei321dev/saydeck/issues/125)のVercel ProjectとIssue [#126](https://github.com/kohei321dev/saydeck/issues/126)のNeon Projectを削除済みとの報告を受けました。repository作業ではProject消失、backup、billing、Project外resourceを独立検証していません。Vercel Blob、GitHub OAuth App、既存Slack Appの現在状態はこの報告の対象外です。
+
+Vercel、Neon、CodeRabbitを再利用する場合は、新しいruntimeでの必要性、作成対象、権限、検証方法、rollbackを別Issueで承認してから設定します。
 
 ## Development
 

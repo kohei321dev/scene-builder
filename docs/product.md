@@ -43,7 +43,7 @@ ownerはreactionまたはthread返信で候補を扱う。
 
 Issue [#116](https://github.com/kohei321dev/saydeck/issues/116)で旧Web runtimeをrepositoryから撤去した。現在は実行可能なruntimeを持たず、Issue [#120](https://github.com/kohei321dev/saydeck/issues/120)で個人用APIとSlack adapterの次期contractを提案している。
 
-旧実装はGit履歴から参照できる。Vercel Projectなどの外部resourceは保持しているが、Issue #122でVercelのGit連携とCodeRabbitのSayDeck accessを解除した。
+旧実装はGit履歴から参照できる。Issue #122でVercelのGit連携とCodeRabbitのSayDeck accessを解除した。その後、2026-09-05にownerからIssue #125のVercel ProjectとIssue #126のNeon Projectを削除済みとの報告を受けた。repository作業では外部Project消失、backup、billingを独立検証していない。
 
 ## Success measures
 

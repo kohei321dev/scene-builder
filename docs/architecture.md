@@ -61,6 +61,8 @@ delete Slack draft code                != delete installed Slack App
 
 Git連携など既存の外部automationがmain更新を検知する可能性はあるが、外部設定変更や既存resource削除は別作業とする。
 
+この図はIssue #116実施時点の責務境界を示す。その後、Issue #122でVercelのGit連携を解除し、2026-09-05にownerからIssue #125のVercel ProjectとIssue #126のNeon Projectを削除済みとの報告を受けた。repository作業では外部Project消失、backup、billingを独立検証しておらず、Vercel Blob、GitHub OAuth App、Slack Appは報告対象外である。
+
 ## 5. Decision history
 
 - ADR 0017はPhase 0実装によりAcceptedとする。

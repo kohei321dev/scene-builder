@@ -48,9 +48,9 @@ Issue [#120](https://github.com/kohei321dev/saydeck/issues/120)では、次をDe
 - PR templateは特定runtimeへ依存せず、Issue固有の検証と外部変更を明示させる。
 - 旧実装の参照・復元にはGit履歴を使用する。
 
-## 5. External resource isolation
+## 5. External resource isolation and reported state
 
-repository cleanupは次を変更していない。停止・削除・再利用は別Issueで扱う。
+Issue #116のrepository cleanupは次を変更していない。停止・削除・再利用は別Issueで扱う境界とした。
 
 - Vercel Project、deployment、domain、Environment Variables
 - Neon Project、database、data
@@ -60,6 +60,15 @@ repository cleanupは次を変更していない。停止・削除・再利用�
 - Google Cloud resource
 
 repositoryから設定名やadapterを削除することと、外部resourceを削除することを同一視しない。
+
+その後の状態は次のとおりである。
+
+- Issue #122: VercelのGit連携とCodeRabbit accessを解除した。
+- Issue #125: 2026-09-05にownerからVercel Projectを削除済みとの報告を受けた。
+- Issue #126: 2026-09-05にownerからNeon Projectを削除済みとの報告を受けた。
+- Status: Incomplete
+- Missing evidence: repository作業ではVercel・NeonのProject消失、backup、billing、credential失効、Project外resourceを独立検証していない。
+- Required decision: 外部状態の証跡が必要になった場合は、secretやprivate URLを出力しないread-only検証を別Issueで承認する。
 
 ## 6. Security and worktree requirements
 
